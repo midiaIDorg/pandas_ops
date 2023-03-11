@@ -8,7 +8,7 @@ setup(
     packages=find_packages(),
     version="0.0.1",
     description="Description.",
-    long_description="Long description.",
+    long_description="Common operations on pandas data frames.",
     author="MatteoLacki",
     author_email="matteo.lacki@gmail.com",
     url="https://github.com/MatteoLacki/pandas_ops.git",
