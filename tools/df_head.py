@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 parser = argparse.ArgumentParser(
-    description="Show first few rows of a dataframe (or a compact representation of it)."
+    description="Show a compact representation of a table."
 )
 parser.add_argument(
     "data_paths",
@@ -36,7 +36,7 @@ parser.add_argument(
     default=5,
 )
 parser.add_argument(
-    "--pd",
+    "--csv",
     help="Run pandas table string representation instead of a csv.",
     action="store_true",
 )
@@ -62,13 +62,13 @@ def get_to_show(data, row_count, pandas_style, columns_only):
 if __name__ == "__main__":
     print()
     for data_path in args.data_paths:
-        if args.pd:
+        if not args.csv:
             print(data_path)
         data = pd.read_feather(
             path=data_path,
             columns=args.columns,
         )
-        to_show = get_to_show(data, args.n, args.pd, args.columns_only)
+        to_show = get_to_show(data, args.n, not args.csv, args.columns_only)
         print(to_show, file=sys.stdout)
-        if args.pd:
+        if not args.csv:
             print()
