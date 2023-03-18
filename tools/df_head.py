@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from pandas_ops.printing import get_to_show
 
 parser = argparse.ArgumentParser(
     description="Show a compact representation of a table."
@@ -47,16 +48,6 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
-
-def get_to_show(data, row_count, pandas_style, columns_only):
-    if columns_only:
-        return data.columns
-    if pandas_style:
-        pd.set_option("display.max_columns", None)
-        pd.set_option("display.max_rows", row_count)
-        return data
-    return data.head(row_count).to_csv(index=data.index.name == "")
 
 
 if __name__ == "__main__":
