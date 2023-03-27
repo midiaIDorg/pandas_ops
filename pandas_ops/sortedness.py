@@ -1,3 +1,5 @@
+from cmath import inf
+
 import numba
 import numpy as np
 
@@ -16,3 +18,13 @@ def is_sorted_lexicographically(*arrays):
     arrays = list(arrays)
     arrays.reverse()
     return assert_consecutive_ints(np.lexsort(arrays))
+
+
+@numba.njit
+def is_strictly_increasing(xx):
+    x_prev = -inf
+    for x in xx:
+        if x_prev >= x:
+            return False
+        x_prev = x
+    return True

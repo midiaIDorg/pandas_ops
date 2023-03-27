@@ -1,10 +1,10 @@
-import os
+import warnings
 from functools import partial
 from pathlib import Path
-from typing import Type
 
 import pandas as pd
 import pandas.errors
+from pyarrow import ArrowInvalid
 
 __ext_to_reader = {
     ".csv": pd.read_csv,
@@ -25,10 +25,22 @@ __ext_to_methodName = {
 }
 
 get_extension = lambda file_path: Path(file_path).suffix.lower()
-get_empty_df = lambda: pd.DataFrame(columns=["empty"]).reset_index(drop=True)
+empty_df = pd.DataFrame(columns=["empty"]).reset_index(drop=True)
+
+
+class MissingColumn(Exception):
+    pass
 
 
 def read_df(file_path: str | Path, *args, **kwargs) -> pd.DataFrame:
+    if (
+        "columns" in kwargs
+        and kwargs["columns"] is not None
+        and "empty" in kwargs["columns"]
+    ):
+        warnings.warn(
+            "Someone uses a column named `empty` in the df. This is a column name reseved for empty dfs."
+        )
     file_extension = get_extension(file_path)
     try:
         reader = __ext_to_reader[file_extension]
@@ -37,7 +49,9 @@ def read_df(file_path: str | Path, *args, **kwargs) -> pd.DataFrame:
     try:
         return reader(file_path, *args, **kwargs)
     except pandas.errors.EmptyDataError:
-        return get_empty_df()
+        return empty_df
+    except ArrowInvalid:
+        raise MissingColumn("Missing some of the columns.")
 
 
 def save_df(
@@ -49,9 +63,6 @@ def save_df(
     **kwargs,
 ) -> None:
     file_extension = get_extension(file_path)
-    if len(dataframe) == 0:
-        dataframe = get_empty_df()
-
     match file_extension:
         case ".tsv":
             dataframe.to_csv(file_path, sep="\t", index=index, *args, **kwargs)
