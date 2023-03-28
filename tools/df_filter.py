@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-import pandas_ops.io
+from pandas_ops.io import empty_df, save_df
 
 parser = argparse.ArgumentParser(description="Open a table, filter rows, save table.")
 parser.add_argument(
@@ -29,4 +29,8 @@ if __name__ == "__main__":
     if len(df) > 0:
         for _filter in args.filters:
             df.query(_filter, inplace=True)
-    pandas_ops.io.save_df(df.reset_index(drop=True), args.target)
+    if len(df) == 0:
+        df = empty_df
+    else:
+        df = df.reset_index(drop=True) 
+    save_df(df, args.target)
