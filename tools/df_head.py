@@ -54,6 +54,8 @@ args = parser.parse_args()
 if __name__ == "__main__":
     print()
     for data_path in args.data_paths:
+        if not args.csv:
+            print(data_path)
         data = read_df(
             file_path=data_path,
             columns=args.columns,
