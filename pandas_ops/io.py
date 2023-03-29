@@ -33,15 +33,19 @@ class MissingColumn(Exception):
 
 
 def read_df(file_path: str | Path, *args, **kwargs) -> pd.DataFrame:
-    if (
-        "columns" in kwargs
-        and kwargs["columns"] is not None
-        and "empty" in kwargs["columns"]
-    ):
-        warnings.warn(
-            "Someone uses a column named `empty` in the df. This is a column name reseved for empty dfs."
-        )
     file_extension = get_extension(file_path)
+
+    if "columns" in kwargs and kwargs["columns"] is None:
+        del kwargs["columns"]
+
+    if "columns" in kwargs and kwargs["columns"] is not None:
+        if "empty" in kwargs["columns"]:
+            warnings.warn(
+                "Someone uses a column named `empty` in the df. This is a column name reseved for empty dfs."
+            )
+        if file_extension in (".tsv", ".csv"):
+            kwargs["usecols"] = kwargs["columns"]
+            del kwargs["columns"]
     try:
         reader = __ext_to_reader[file_extension]
     except KeyError:

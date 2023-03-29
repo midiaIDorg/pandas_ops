@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from pandas_ops.io import read_df
 from pandas_ops.printing import get_to_show
 
 parser = argparse.ArgumentParser(
@@ -53,10 +54,8 @@ args = parser.parse_args()
 if __name__ == "__main__":
     print()
     for data_path in args.data_paths:
-        if not args.csv:
-            print(data_path)
-        data = pd.read_feather(
-            path=data_path,
+        data = read_df(
+            file_path=data_path,
             columns=args.columns,
         )
         to_show = get_to_show(data, args.n, not args.csv, args.columns_only)
