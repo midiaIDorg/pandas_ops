@@ -72,6 +72,8 @@ def save_df(
             dataframe.to_csv(file_path, sep="\t", index=index, *args, **kwargs)
         case ".feather":
             dataframe.to_feather(file_path, *args, **kwargs)
+        case ".parquet":
+            dataframe.to_parquet(file_path, *args, **kwargs)
         case ".pandas_hdf":
             dataframe.to_hdf(file_path, key=key, *args, **kwargs)
         case other:  # this might obviously not work
