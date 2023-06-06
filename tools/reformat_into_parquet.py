@@ -2,11 +2,12 @@
 import argparse
 from pprint import pprint
 
-from tqdm import tqdm
-
 import fastparquet
 import pandas as pd
 from pandas_ops.io import read_df
+from tqdm import tqdm
+
+DEBUG = False
 
 parser = argparse.ArgumentParser("Save data in a parquet format.")
 parser.add_argument(
@@ -28,6 +29,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--progressbar_message",
+    help="Message to be shown in the progressbar.",
+    default="Saving tables into parquet.",
+)
+
+parser.add_argument(
     "--verbose",
     help="Be more verbose.",
     action="store_true",
@@ -35,19 +42,22 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-if args.verbose:
+
+if args.verbose and DEBUG:
     pprint(args.__dict__)
 
 if __name__ == "__main__":
     table_paths = args.tables
     if args.verbose:
-        table_paths = tqdm(table_paths, desc="Rewriting tables into parquet")
-    for i, df in enumerate(map(read_df, table_paths)):
+        table_paths = tqdm(table_paths, desc=args.progressbar_message)
+    first = True
+    for df in map(read_df, table_paths):
         if len(df) > 0:
             fastparquet.write(
                 filename=args.output,
                 data=df,
                 partition_on=args.partition_on,
-                append=i > 0,
+                append=not first,
                 file_scheme="simple" if args.partition_on is None else "hive",
             )
+            first = False
