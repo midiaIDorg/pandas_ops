@@ -2,6 +2,7 @@ import warnings
 from functools import partial
 from pathlib import Path
 
+import mmapped_df
 import pandas as pd
 import pandas.errors
 from pyarrow import ArrowInvalid
@@ -14,6 +15,7 @@ __ext_to_reader = {
     ".feather": pd.read_feather,
     ".pandas_hdf": pd.read_hdf,
     ".parquet": pd.read_parquet,
+    ".startrek": mmapped_df.open_dataset,
 }
 __ext_to_methodName = {
     ".csv": "to_csv",
