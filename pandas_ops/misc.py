@@ -19,11 +19,16 @@ def coordinatewise_maximum(*args):
     return pd.DataFrame(args).max()
 
 
-def get_extents(*args: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
-    return (
-        coordinatewise_minimum(*(x.min().to_numpy() for x in args)),
-        coordinatewise_maximum(*(x.max().to_numpy() for x in args)),
-    )
+def get_extents(
+    *args: pd.DataFrame, resize_factor: float = 0
+) -> tuple[pd.Series, pd.Series]:
+    mins = coordinatewise_minimum(*(x.min().to_numpy() for x in args))
+    maxs = coordinatewise_maximum(*(x.max().to_numpy() for x in args))
+    if resize_factor != 0:
+        extents = maxs - mins
+        mins -= extents * resize_factor
+        maxs += extents * resize_factor
+    return mins, maxs
 
 
 def overwrite_columns(original_df, new_df, prefix=""):
