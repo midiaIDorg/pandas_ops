@@ -1,3 +1,4 @@
+import numpy.typing as npt
 import pandas as pd
 
 
@@ -39,3 +40,22 @@ def overwrite_columns(original_df, new_df, prefix=""):
         ],
         axis=1,
     )
+
+
+def add_column_to_pandas_dataframe_without_copying_data(
+    df: pd.DataFrame,
+    allow_column_overwrites: bool = False,
+    **columns: npt.NDArray,
+) -> pd.DataFrame:
+    """
+    Add column without copying space.
+    """
+    if not allow_column_overwrites:
+        for column, values in columns.items():
+            assert not column in df.columns, f"Column `{column}` would be overwritten."
+            assert len(values) == len(
+                df
+            ), f"Column `{column}` has size (`{len(values)}`) not conforming to that of `df` ({len(df)})."
+    dct = {col: df[col].to_numpy() for col in df.columns}
+    dct.update(**columns)
+    return pd.DataFrame(dct, copy=False)

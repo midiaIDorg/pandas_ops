@@ -1,3 +1,7 @@
+""" 
+TODO: start using Michal's midia_cpp::argsort for parallelized argsort (numpy sucks here)
+"""
+
 from cmath import inf
 
 import numba
