@@ -79,9 +79,8 @@ def save_df(
         case ".pandas_hdf":
             dataframe.to_hdf(file_path, key=key, *args, **kwargs)
         case ".startrek":
-            data_writer = mmapped_df.DatasetWriter(path=file_path, **kwargs)
-            data_writer.append_df(dataframe)
-            del data_writer
+            with mmapped_df.DatasetWriter(path=file_path, **kwargs) as data_writer:
+                data_writer.append_df(dataframe)
         case other:  # this might obviously not work
             writer = getattr(dataframe, __ext_to_methodName[file_extension])
             try:
