@@ -40,7 +40,6 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
-
     data = read_df(file_path=args.data_path)
     to_plot = eval(args.column)
     if args.outliers:
@@ -49,6 +48,7 @@ if __name__ == "__main__":
         to_plot = to_plot[num_to_drop:-num_to_drop]
 
     from matplotlib import pyplot as plt
+
     plt.hist(to_plot, bins=1000)
     plt.title(args.column)
 
@@ -56,4 +56,3 @@ if __name__ == "__main__":
         plt.savefig(args.output)
     else:
         plt.show()
-
