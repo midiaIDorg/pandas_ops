@@ -59,3 +59,10 @@ def add_column_to_pandas_dataframe_without_copying_data(
     dct = {col: df[col].to_numpy() for col in df.columns}
     dct.update(**columns)
     return pd.DataFrame(dct, copy=False)
+
+
+def in_ipython():
+    try:
+        return __IPYTHON__
+    except NameError:
+        return False

@@ -30,7 +30,7 @@ setup(
         "numba",
         "pandas",
         "tqdm",
-        # "mmapped_df",
+        "duckdb",
     ],
     scripts=glob.glob("tools/*.py"),
 )
