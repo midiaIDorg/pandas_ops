@@ -26,7 +26,7 @@ def read_tims_config(path):
 
 
 def write_tims_config(tims_config: dict[str, str], out: Path | str | None = None):
-    text = "\n".join((f"{k} = {v}" for k, v in tims_config.items())) + "\n"
+    text = "\n".join((f"{k}={v}" for k, v in tims_config.items())) + "\n"
     if out is None:
         print(text)
     else:
