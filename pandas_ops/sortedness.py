@@ -1,4 +1,4 @@
-""" 
+"""
 TODO: start using Michal's midia_cpp::argsort for parallelized argsort (numpy sucks here)
 """
 
@@ -6,6 +6,7 @@ from cmath import inf
 
 import numba
 import numpy as np
+import numpy.typing as npt
 
 
 @numba.njit
@@ -32,3 +33,15 @@ def is_strictly_increasing(xx):
             return False
         x_prev = x
     return True
+
+
+@numba.njit
+def count_sorted(xx: npt.NDArray):
+    if len(xx) == 0:
+        return 0
+    cnt = 1
+    prev = xx[0]
+    for x in xx:
+        if x != prev:
+            cnt += 1
+    return cnt
