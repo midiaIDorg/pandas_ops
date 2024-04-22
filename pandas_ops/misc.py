@@ -1,3 +1,4 @@
+import numba
 import numpy.typing as npt
 import pandas as pd
 
@@ -66,3 +67,10 @@ def in_ipython():
         return __IPYTHON__
     except NameError:
         return False
+
+
+@numba.njit(parallel=True)
+def fill_nans(xx, filler):
+    for i in numba.prange(len(xx)):
+        if np.isnan(xx[i]):
+            xx[i] = filler
