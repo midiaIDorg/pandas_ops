@@ -44,6 +44,7 @@ if __name__ == "__main__":
     to_plot = eval(args.column)
     if args.outliers:
         import numpy as np
+
         to_plot = np.sort(to_plot)
         num_to_drop = int(args.outliers * len(to_plot))
         to_plot = to_plot[num_to_drop:-num_to_drop]
