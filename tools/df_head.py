@@ -47,6 +47,12 @@ parser.add_argument(
     help="Show only columns of submitted tables.",
     action="store_true",
 )
+parser.add_argument(
+    "-i",
+    "--interactive",
+    help='Drop to IPython interactive session with the table loaded as "data".',
+    action="store_true",
+)
 
 args = parser.parse_args()
 
@@ -64,3 +70,7 @@ if __name__ == "__main__":
         print(to_show, file=sys.stdout)
         if not args.csv:
             print()
+    if args.interactive:
+        import IPython
+
+        IPython.embed()
