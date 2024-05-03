@@ -4,13 +4,21 @@ from tqdm import tqdm
 
 import pandas as pd
 
+# def iter_start_end_tuples(size, N) -> typing.Iterator[tuple[int, int]]:
+#     prev = 0
+#     while prev < N:
+#         curr = prev + size
+#         yield prev, curr
+#         prev = curr
 
-def iter_start_end_tuples(size, N) -> typing.Iterator[tuple[int, int]]:
-    prev = 0
-    while prev < N:
-        curr = prev + size
-        yield prev, curr
-        prev = curr
+
+def iter_start_end_tuples(size, N):
+    idx = 0
+    for i in range(N // size):
+        yield idx, idx + size
+        idx += size
+    if N > idx:
+        yield (idx, N)
 
 
 def iter_df_batches(
