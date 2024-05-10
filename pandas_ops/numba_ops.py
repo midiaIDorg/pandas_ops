@@ -1,5 +1,7 @@
 import functools
 
+import pandas as pd
+
 
 def inputs_series_to_numpy(foo):
     @functools.wraps(foo)
