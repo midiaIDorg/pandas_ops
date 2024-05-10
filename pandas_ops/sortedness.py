@@ -10,9 +10,8 @@ import numpy.typing as npt
 from pandas_ops.numba_ops import inputs_series_to_numpy
 
 
-@inputs_series_to_numpy
 @numba.njit
-def assert_consecutive_ints(xx):
+def _assert_consecutive_ints(xx):
     i_prev = -1
     for i in xx:
         if i > i_prev + 1:
@@ -21,9 +20,11 @@ def assert_consecutive_ints(xx):
     return True
 
 
-@inputs_series_to_numpy
+assert_consecutive_ints = inputs_series_to_numpy(_assert_consecutive_ints)
+
+
 @numba.njit
-def is_strictly_increasing(xx):
+def _is_strictly_increasing(xx):
     x_prev = -inf
     for x in xx:
         if x_prev >= x:
@@ -32,9 +33,11 @@ def is_strictly_increasing(xx):
     return True
 
 
-@inputs_series_to_numpy
+is_strictly_increasing = inputs_series_to_numpy(_is_strictly_increasing)
+
+
 @numba.njit
-def is_nondecreasing(xx):
+def _is_nondecreasing(xx):
     x_prev = -inf
     for x in xx:
         if x_prev > x:
@@ -43,9 +46,11 @@ def is_nondecreasing(xx):
     return True
 
 
-@inputs_series_to_numpy
+is_nondecreasing = inputs_series_to_numpy(_is_nondecreasing)
+
+
 @numba.njit
-def count_sorted(xx: npt.NDArray):
+def _count_sorted(xx: npt.NDArray):
     if len(xx) == 0:
         return 0
     cnt = 1
@@ -56,9 +61,11 @@ def count_sorted(xx: npt.NDArray):
     return cnt
 
 
-@inputs_series_to_numpy
+count_sorted = inputs_series_to_numpy(_count_sorted)
+
+
 @numba.njit(boundscheck=True)
-def is_sorted_lexicographically(
+def _is_sorted_lexicographically(
     strictly: bool = True,
     *arrays: npt.NDArray,
 ) -> bool:
@@ -94,6 +101,9 @@ def is_sorted_lexicographically(
             prev[j] = arrays[j][i]
 
     return True
+
+
+is_sorted_lexicographically = inputs_series_to_numpy(_is_sorted_lexicographically)
 
 
 def test_is_sorted_lexicograhically():
