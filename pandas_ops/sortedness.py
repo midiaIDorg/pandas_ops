@@ -7,8 +7,10 @@ from math import inf
 import numba
 import numpy as np
 import numpy.typing as npt
+from pandas_ops.numba_ops import inputs_series_to_numpy
 
 
+@inputs_series_to_numpy
 @numba.njit
 def assert_consecutive_ints(xx):
     i_prev = -1
@@ -19,6 +21,7 @@ def assert_consecutive_ints(xx):
     return True
 
 
+@inputs_series_to_numpy
 @numba.njit
 def is_strictly_increasing(xx):
     x_prev = -inf
@@ -29,6 +32,7 @@ def is_strictly_increasing(xx):
     return True
 
 
+@inputs_series_to_numpy
 @numba.njit
 def is_nondecreasing(xx):
     x_prev = -inf
@@ -39,6 +43,7 @@ def is_nondecreasing(xx):
     return True
 
 
+@inputs_series_to_numpy
 @numba.njit
 def count_sorted(xx: npt.NDArray):
     if len(xx) == 0:
@@ -51,6 +56,7 @@ def count_sorted(xx: npt.NDArray):
     return cnt
 
 
+@inputs_series_to_numpy
 @numba.njit(boundscheck=True)
 def is_sorted_lexicographically(
     strictly: bool = True,
