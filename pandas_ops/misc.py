@@ -63,6 +63,18 @@ def add_column_to_pandas_dataframe_without_copying_data(
     return pd.DataFrame(dct, copy=False)
 
 
+def extend_df(df: pd.DataFrame, *other_dfs: pd.DataFrame) -> None:
+    _cols = set(df.columns)
+    _size = len(df.columns)
+    for odf in other_dfs:
+        _cols |= set(odf.columns)
+        _size += len(odf.columns)
+    assert len(_cols) == _size, "Some columns do not have different names."
+    for odf in other_dfs:
+        for col in odf.columns:
+            df[col] = odf[col].to_numpy()
+
+
 def in_ipython():
     try:
         return __IPYTHON__
