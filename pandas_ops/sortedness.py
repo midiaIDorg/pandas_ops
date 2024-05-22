@@ -146,3 +146,34 @@ def count_intersection_of_sorted_arrays(xx: npt.NDArray, yy: npt.NDArray) -> int
             j += 1
             prev_y = y
     return cnt
+
+
+@inputs_series_to_numpy
+@numba.njit
+def get_intersection_of_sorted_arrays(xx: npt.NDArray, yy: npt.NDArray) -> npt.NDArray:
+    """
+    Count the number of common elements in two sorted arrays.
+    """
+    res = []
+    i = 0
+    j = 0
+    prev_x = -math.inf
+    prev_y = -math.inf
+    while i < len(xx) and j < len(yy):
+        x = xx[i]
+        y = yy[j]
+        assert prev_x < x, "xx was not sorted"
+        assert prev_y < y, "yy was not sorted"
+        if x == y:
+            i += 1
+            j += 1
+            res.append(x)
+            prev_x = x
+            prev_y = y
+        if x < y:
+            i += 1
+            prev_x = x
+        if y < x:
+            j += 1
+            prev_y = y
+    return np.array(res, dtype=xx.dtype)
