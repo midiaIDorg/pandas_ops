@@ -23,7 +23,7 @@ def get_unique(ids: npt.NDArray, upper_limit: int | None = None) -> npt.NDArray:
     if upper_limit is not None:
         N = upper_limit
     else:
-        N = np.max(ids) + 1
+        N = int(np.max(ids)) + 1
 
     return observe(
         ids,

@@ -2,6 +2,7 @@
 TODO: start using Michal's midia_cpp::argsort for parallelized argsort (numpy sucks here)
 """
 
+import math
 from math import inf
 
 import numba
@@ -114,3 +115,34 @@ def test_is_sorted_lexicograhically():
         True, np.array([10, 11, 20, 30]), np.array([11, 11, 1, 2])
     )
     assert not is_sorted_lexicographically(True, np.array([11, 1]), np.array([11, 20]))
+
+
+@inputs_series_to_numpy
+@numba.njit
+def count_intersection_of_sorted_arrays(xx: npt.NDArray, yy: npt.NDArray) -> int:
+    """
+    Count the number of common elements in two sorted arrays.
+    """
+    cnt = 0
+    i = 0
+    j = 0
+    prev_x = -math.inf
+    prev_y = -math.inf
+    while i < len(xx) and j < len(yy):
+        x = xx[i]
+        y = yy[j]
+        assert prev_x < x, "xx was not sorted"
+        assert prev_y < y, "yy was not sorted"
+        if x == y:
+            i += 1
+            j += 1
+            cnt += 1
+            prev_x = x
+            prev_y = y
+        if x < y:
+            i += 1
+            prev_x = x
+        if y < x:
+            j += 1
+            prev_y = y
+    return cnt
