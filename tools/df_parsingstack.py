@@ -7,7 +7,7 @@ import pandas as pd
 from pandas_ops.io import read_df, save_df
 
 parser = argparse.ArgumentParser(
-    "Cast data into a new format.",
+    "Combine multiple table files into one and add in meta info by regex-based parsing the submitted paths.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument("output", help="Path to the output table.", type=pathlib.Path)
