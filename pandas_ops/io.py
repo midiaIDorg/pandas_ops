@@ -10,6 +10,7 @@ from pyarrow import ArrowInvalid
 __ext_to_reader = {
     ".csv": pd.read_csv,
     ".tsv": partial(pd.read_csv, sep="\t"),
+    ".txt": partial(pd.read_table),
     ".xlsx": pd.read_excel,
     ".json": pd.read_json,
     ".feather": pd.read_feather,
