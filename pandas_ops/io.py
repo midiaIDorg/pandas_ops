@@ -1,3 +1,5 @@
+import functools
+import inspect
 import warnings
 from functools import partial
 from pathlib import Path
@@ -7,17 +9,31 @@ import pandas as pd
 import pandas.errors
 from pyarrow import ArrowInvalid
 
+
+def add_kwargs(foo):
+    """Make a foo without **kwargs have **kwargs."""
+    foo_params = inspect.signature(foo).parameters
+
+    @functools.wraps(foo)
+    def wrapper(*args, **kwargs):
+        clipped_kwargs = {k: v for k, v in kwargs.items() if k in foo_params}
+        return foo(*args, **clipped_kwargs)
+
+    return wrapper
+
+
 __ext_to_reader = {
-    ".csv": pd.read_csv,
-    ".tsv": partial(pd.read_csv, sep="\t"),
-    ".txt": partial(pd.read_table),
-    ".xlsx": pd.read_excel,
-    ".json": pd.read_json,
-    ".feather": pd.read_feather,
-    ".pandas_hdf": pd.read_hdf,
-    ".parquet": pd.read_parquet,
-    ".startrek": mmapped_df.open_dataset,
+    ".csv": add_kwargs(pd.read_csv),
+    ".tsv": add_kwargs(partial(pd.read_csv, sep="\t")),
+    ".txt": add_kwargs(partial(pd.read_table)),
+    ".xlsx": add_kwargs(pd.read_excel),
+    ".json": add_kwargs(pd.read_json),
+    ".feather": add_kwargs(pd.read_feather),
+    ".pandas_hdf": add_kwargs(pd.read_hdf),
+    ".parquet": add_kwargs(pd.read_parquet),
+    ".startrek": add_kwargs(mmapped_df.open_dataset),
 }
+
 __ext_to_methodName = {
     ".csv": "to_csv",
     ".xlsx": "to_excel",
@@ -88,3 +104,24 @@ def save_df(
                 writer(file_path, *args, index=index, **kwargs)
             except TypeError:
                 writer(file_path, *args, **kwargs)
+
+
+__writer_specific_kwargs = {".tsv": dict(sep="\t")}
+
+
+def save_df2(
+    dataframe: pd.DataFrame,
+    file_path: str | Path,
+    *args,
+    **kwargs,
+) -> None:
+    file_extension = get_extension(file_path)
+    match file_extension:
+        case ".startrek":
+            with mmapped_df.DatasetWriter(path=file_path, **kwargs) as data_writer:
+                data_writer.append_df(dataframe)
+        case other:
+            writer_name = f"to_{file_extension[1:]}"
+            writer = add_kwargs(getattr(dataframe, writer_name))
+            kwargs.update(__writer_specific_kwargs.get(writer_name, {}))
+            writer(file_path, *args, **kwargs)

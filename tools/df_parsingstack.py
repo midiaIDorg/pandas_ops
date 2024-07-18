@@ -2,9 +2,10 @@
 import argparse
 import pathlib
 import re
+from pprint import pprint
 
 import pandas as pd
-from pandas_ops.io import read_df, save_df
+from pandas_ops.io import read_df, save_df2
 
 parser = argparse.ArgumentParser(
     "Combine multiple table files into one and add in meta info by regex-based parsing the submitted paths.",
@@ -31,19 +32,25 @@ parser.add_argument(
     default="",
     type=str,
 )
+parser.add_argument(
+    "--partition_cols",
+    nargs="+",
+    help="Which columns should be used to split the parquet file?",
+    type=str,
+)
 
-args = parser.parse_args()
-
+args = parser.parse_args().__dict__
 
 if __name__ == "__main__":
+    pprint(args)
     dfs = []
-    path_pattern = re.compile(args.paths_regex)
+    path_pattern = re.compile(args["paths_regex"])
 
-    for path in args.inputs:
-        if args.verbose:
+    for path in args["inputs"]:
+        if args["verbose"]:
             print(path)
         if not path.exists():
-            if args.verbose:
+            if args["verbose"]:
                 print(f"Missing `{path}`")
         else:
             df = read_df(path)
@@ -54,7 +61,15 @@ if __name__ == "__main__":
             dfs.append(df)
 
     if len(dfs) > 0:
-        out = pd.concat(dfs, ignore_index=True, axis=args.howtostack == "horizontal")
-        save_df(out, args.output)
+        out = pd.concat(dfs, ignore_index=True, axis=args["howtostack"] == "horizontal")
+        save_df2(
+            out,
+            args["output"],
+            partition_cols=args.get(
+                "partition_cols",
+                None,
+            ),
+            index=False,
+        )
 
 # TODO: test it under csvs using different paths.
