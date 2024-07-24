@@ -55,6 +55,12 @@ parser.add_argument(
     default="table_id",
     type=str,
 )
+parser.add_argument(
+    "--name_of_path_name_column",
+    help="If not empty, that is the name of the column in the output table that contains the provided path.",
+    default="in_path",
+    type=str,
+)
 
 
 args = parser.parse_args().__dict__
@@ -91,6 +97,8 @@ if __name__ == "__main__":
             meta = {}
             if len(args["name_of_table_index"]) > 0:
                 meta[args["name_of_table_index"]] = table_id
+            if len(args["name_of_path_name_column"]) > 0:
+                meta[args["name_of_path_name_column"]] = str(path)
             match = path_pattern.search(str(path))
             if match:
                 meta.update(match.groupdict())
