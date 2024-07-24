@@ -48,6 +48,14 @@ parser.add_argument(
     default={},
     type=str,
 )
+parser.add_argument(
+    "--name_of_table_index",
+    help="By default, the column name used to distinguish passed in tables in case of their content being the same or difficult to tell apart. Pass in empty string "
+    " not to append that column (saving some space for larger datasets, which we do not recommend).",
+    default="table_id",
+    type=str,
+)
+
 
 args = parser.parse_args().__dict__
 
@@ -67,7 +75,11 @@ if __name__ == "__main__":
 
     path_pattern = re.compile(args["paths_regex"])
 
-    for path in args["inputs"]:
+    assert not args["name_of_table_index"] in set(
+        path_pattern.groupindex
+    ), f"It seems that the provided name of table index, `{args['name_of_table_index']}`, coincides with a name of one of the named patterns in the provided regular expression used to parse the paths of tables,\n`{args['paths_regex']}`\nMake adjustements."
+
+    for table_id, path in enumerate(args["inputs"]):
         if _verbose:
             print(path)
         if not path.exists():
@@ -76,10 +88,16 @@ if __name__ == "__main__":
         else:
             df = read_df(path)
             df = df_filter(df)
+            meta = {}
+            if len(args["name_of_table_index"]) > 0:
+                meta[args["name_of_table_index"]] = table_id
             match = path_pattern.search(str(path))
             if match:
-                meta = pd.DataFrame([match.groupdict()] * len(df))
+                meta.update(match.groupdict())
+            if len(meta) > 0:
+                meta = pd.DataFrame([meta] * len(df))
                 df = pd.concat([meta, df], axis=1)
+
             dfs.append(df)
 
     if _verbose:
