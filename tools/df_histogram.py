@@ -39,7 +39,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     data = read_df(file_path=args.data_path)
     to_plot = eval(args.column)
     if args.outliers:
@@ -58,3 +58,7 @@ if __name__ == "__main__":
         plt.savefig(args.output)
     else:
         plt.show()
+
+
+if __name__ == "__main__":
+    main(args)

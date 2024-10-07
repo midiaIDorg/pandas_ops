@@ -15,5 +15,9 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     save_df(read_df(args.in_table), args.out_table)
+
+
+if __name__ == "__main__":
+    main(args)

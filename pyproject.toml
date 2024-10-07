@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools >= 64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="pandas_ops"
+version="0.0.2"
+description="Common operations on pandas data frames."
+readme="README.md"
+authors=[
+    {name="Mateusz Krzysztof Łącki",email="matteo.lacki@gmail.com"},
+    {name="Michał Piotr Startek",email="michalsta@mimuw.edu.pl"},
+]
+dependencies = [
+    "numpy",
+    "numba",
+    "pandas",
+    "tqdm",
+    "duckdb",
+]
+
+[project.scripts]
+write_config = "tools.write_config:main"
+apply_sql_with_duckdb = "tools.apply_sql_with_duckdb:main"
+df_cat = "tools.df_cat:main"
+df_equal = "tools.df_equal:main"
+df_head = "tools.df_head:main"
+df_histogram = "tools.df_histogram:main"
+df_len = "tools.df_len:main"
+df_parsingstack = "tools.df_parsingstack:main"
+df_reformat = "tools.df_reformat:main"
+pandas_ops_run_sql_on_table = "tools.pandas_ops_run_sql_on_table:main"
+reformat_into_parquet = "tools.reformat_into_parquet:main"
+
+[project.urls]
+homepage="https://github.com/midiaIDorg/pandas_ops.git"
+repository="https://github.com/midiaIDorg/pandas_ops.git"
+
+[tool.uv]
+reinstall-package = ["pandas_ops"]

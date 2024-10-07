@@ -21,7 +21,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     ext_2_reader = {
         ".csv": pd.read_csv,
         ".feather": pd.read_feather,
@@ -35,3 +35,7 @@ if __name__ == "__main__":
 
     combined_df = pd.concat(stream_of_dfs(), ignore_index=True)
     combined_df.to_feather(args.output)
+
+
+if __name__ == "__main__":
+    main(args)

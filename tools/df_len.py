@@ -31,7 +31,9 @@ parser.add_argument(
     action="store_true",
 )
 args = parser.parse_args()
-if __name__ == "__main__":
+
+
+def main(args):
     df = pd.DataFrame(
         ((str(path), len(pandas_ops.io.read_df(path))) for path in args.data_paths),
         columns=["path", "count"],
@@ -42,3 +44,7 @@ if __name__ == "__main__":
         print(to_show, file=sys.stdout)
     else:
         pandas_ops.io.save_df(df, args.output)
+
+
+if __name__ == "__main__":
+    main(args)

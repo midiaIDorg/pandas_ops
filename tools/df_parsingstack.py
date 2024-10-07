@@ -65,7 +65,8 @@ parser.add_argument(
 
 args = parser.parse_args().__dict__
 
-if __name__ == "__main__":
+
+def main(args):
     dfs = []
     _verbose = args["verbose"]
 
@@ -122,4 +123,8 @@ if __name__ == "__main__":
             partition_cols=args["partition_cols"],
         )
 
+
 # TODO: test it under csvs using different paths.
+
+if __name__ == "__main__":
+    main(args)

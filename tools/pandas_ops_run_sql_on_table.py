@@ -32,7 +32,7 @@ parser.add_argument("target", help="Path to the summary table.", type=Path)
 args = parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     with open(args.config, "rb") as f:
         config = tomllib.load(f)
     duckcon = duckdb.connect()
@@ -43,3 +43,7 @@ if __name__ == "__main__":
         source = "df"
     _query = config["sql"].format(source=source, target=args.target)
     duckcon.execute(_query)
+
+
+if __name__ == "__main__":
+    main(args)

@@ -57,7 +57,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-if __name__ == "__main__":
+def main(args):
     print()
     for data_path in args.data_paths:
         if not args.csv:
@@ -74,3 +74,7 @@ if __name__ == "__main__":
         import IPython
 
         IPython.embed()
+
+
+if __name__ == "__main__":
+    main(args)

@@ -3,11 +3,10 @@ import argparse
 import sys
 from pprint import pprint
 
-from tqdm import tqdm
-
 import fastparquet
 import pandas as pd
 from pandas_ops.io import read_df
+from tqdm import tqdm
 
 DEBUG = False
 
@@ -22,7 +21,8 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-if __name__ == "__main__":
+
+def main(args):
     tables = map(read_df, args.tables)
     table_prev = next(tables)
     same = True
@@ -36,3 +36,7 @@ if __name__ == "__main__":
     if same:
         print("All the same.")
     sys.exit(not same)
+
+
+if __name__ == "__main__":
+    main(args)

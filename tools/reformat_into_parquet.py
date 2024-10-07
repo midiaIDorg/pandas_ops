@@ -43,10 +43,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-if args.verbose and DEBUG:
-    pprint(args.__dict__)
+def main(args):
+    if args.verbose and DEBUG:
+        pprint(args.__dict__)
 
-if __name__ == "__main__":
     table_paths = args.tables
     if args.verbose:
         table_paths = tqdm(table_paths, desc=args.progressbar_message)
@@ -61,3 +61,7 @@ if __name__ == "__main__":
                 file_scheme="simple" if args.partition_on is None else "hive",
             )
             first = False
+
+
+if __name__ == "__main__":
+    main(args)

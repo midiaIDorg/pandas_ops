@@ -81,7 +81,7 @@ else:
     pprint(args.__dict__)
 
 
-if __name__ == "__main__":
+def main(args):
     assert (args.config is None) ^ (
         args.sql is None
     ), "Provide EITHER an sql or a path to the config toml, not both, not none."
@@ -98,3 +98,7 @@ if __name__ == "__main__":
         print("Filtering table:")
         pprint(sql)
     duckdb.query(sql)
+
+
+if __name__ == "__main__":
+    main(args)
