@@ -174,7 +174,7 @@ class LexicographicIndex:
         output_array,
         *foo_args,
         progress_proxy: ProgressBar | None = None,
-        desc: str = "",
+        desc: str | None = None,
     ) -> None:
         """
         Apply `foo` on data divided into chunks by the current index.
@@ -190,7 +190,6 @@ class LexicographicIndex:
             *foo_args,
             progress_proxy=progress_proxy,
             desc=desc,
-            verbose=verbose,
         )
 
     def simple_map(
@@ -199,7 +198,7 @@ class LexicographicIndex:
         output_array,
         *foo_args,
         progress_proxy=None,
-        desc="",
+        desc: str | None = None,
     ) -> None:
         assert (
             len(foo_args) <= 10
@@ -214,7 +213,6 @@ class LexicographicIndex:
             *foo_args,  # remaining foo_args*
             progress_proxy=progress_proxy,
             desc=desc,
-            verbose=verbose,
         )
 
     def typed_map(
@@ -224,8 +222,9 @@ class LexicographicIndex:
         res_type,
         *foo_args,
         progress_proxy=None,
-        desc="",
+        desc: str | None = None,
     ) -> npt.NDArray:
+        raise NotImplementedError
         output_array = np.empty(dtype=res_type, shape=len(self))
         self.map(foo, arr, output_array, *foo_args, progress_proxy, desc)
         return output_array
