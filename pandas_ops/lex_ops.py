@@ -206,11 +206,19 @@ class LexicographicIndex:
         assert has_varargs(
             foo
         ), "You need to pass in a numba compiled function with *args."
+        foo_args_arrays = []
+        for arg in foo_args:
+            try:
+                arg = arg.to_numpy()
+            except AttributeError:
+                pass
+            foo_args_arrays.append(arg)
+        # we could inspect the number of arguments and choosing appropriately...
         self.general_map(
             simple_max_10_args_io,  # foo
             output_array,  # foo_args*
             foo,  # foo_args*
-            *foo_args,  # remaining foo_args*
+            *foo_args_arrays,  # remaining foo_args*
             progress_proxy=progress_proxy,
             desc=desc,
         )

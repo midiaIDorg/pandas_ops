@@ -1,7 +1,8 @@
 import typing
 
-import pandas as pd
 from tqdm import tqdm
+
+import pandas as pd
 
 
 def iter_start_end_tuples(size, N) -> typing.Iterator[tuple[int, int]]:
@@ -28,3 +29,9 @@ def iter_df_batches(
         )
     for start, end in start_end_tuples:
         yield df[start:end]
+
+
+def repeat(iterable, n):
+    for el in iterable:
+        for _ in range(n):
+            yield el

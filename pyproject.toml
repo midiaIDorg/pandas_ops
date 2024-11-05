@@ -18,6 +18,7 @@ dependencies = [
     "pandas",
     "tqdm",
     "duckdb",
+    "pytest",
 ]
 
 [project.scripts]
@@ -40,3 +41,7 @@ repository="https://github.com/midiaIDorg/pandas_ops.git"
 
 [tool.uv]
 reinstall-package = ["pandas_ops"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
