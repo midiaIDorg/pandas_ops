@@ -12,8 +12,9 @@ authors=[
     {name="Michał Piotr Startek",email="michalsta@mimuw.edu.pl"},
 ]
 dependencies = [
-    "numba",
     "numpy",
+    "numba",
+    "numba_progress",
     "pandas",
     "tqdm",
     "duckdb",
@@ -31,6 +32,7 @@ df_parsingstack = "tools.df_parsingstack:main"
 df_reformat = "tools.df_reformat:main"
 pandas_ops_run_sql_on_table = "tools.pandas_ops_run_sql_on_table:main"
 reformat_into_parquet = "tools.reformat_into_parquet:main"
+
 
 [project.urls]
 homepage="https://github.com/midiaIDorg/pandas_ops.git"
