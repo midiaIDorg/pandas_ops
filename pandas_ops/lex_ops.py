@@ -197,9 +197,19 @@ class LexicographicIndex:
         foo,
         output_array,
         *foo_args,
-        progress_proxy=None,
+        progress_proxy: ProgressBar | None = None,
         desc: str | None = None,
     ) -> None:
+        """
+        This function will apply the user defined njit-compiled `foo` to chunks defined by isoquants of the index.
+
+        Arguments:
+            foo: njitted function
+            output_array: array of size len(index)*len(foo_result). The user must make sure the size is as should (function results will be stored in rows of the `output_array`).
+            *foo_args: a number of positional arguments to the function: columns of the same size assumed.
+            progress_proxy: to reuse outside provided numba_progress progress proxy.
+            desc: message for the new proxy if not using user provided proxy.
+        """
         assert (
             len(foo_args) <= 10
         ), f"Supporting up to {len(foo_args)} arguments for `foo`."
