@@ -19,6 +19,7 @@ dependencies = [
     "tqdm",
     "duckdb",
     "pytest",
+    "h5py",
 ]
 
 [project.scripts]

@@ -4,6 +4,7 @@ import warnings
 from functools import partial
 from pathlib import Path
 
+import h5py
 import mmapped_df
 import pandas as pd
 import pandas.errors
@@ -22,6 +23,19 @@ def add_kwargs(foo):
     return wrapper
 
 
+def hdf2df(path, group, columns: list[str] | None = None, **kwargs):
+    data = {}
+    with h5py.File(path) as f:
+        if columns is not None:
+            for col in columns:
+                assert col in f[group], f"Missing column `{col}`."
+        else:
+            columns = f[group]
+        for col in columns:
+            data[col] = f[f"{group}/{col}"][:]
+    return pd.DataFrame(data)
+
+
 __ext_to_reader = {
     ".csv": add_kwargs(pd.read_csv),
     ".tsv": add_kwargs(partial(pd.read_csv, sep="\t")),
@@ -30,6 +44,7 @@ __ext_to_reader = {
     ".json": add_kwargs(pd.read_json),
     ".feather": add_kwargs(pd.read_feather),
     ".pandas_hdf": add_kwargs(pd.read_hdf),
+    ".hdf": hdf2df,
     ".parquet": add_kwargs(pd.read_parquet),
     ".startrek": add_kwargs(mmapped_df.open_dataset),
 }

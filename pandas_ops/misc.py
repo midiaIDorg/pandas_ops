@@ -87,3 +87,10 @@ def fill_nans(xx, filler):
     for i in numba.prange(len(xx)):
         if np.isnan(xx[i]):
             xx[i] = filler
+
+
+def cast_to_array_if_possible(arg):
+    try:
+        return arg.to_numpy()
+    except AttributeError:
+        return arg
