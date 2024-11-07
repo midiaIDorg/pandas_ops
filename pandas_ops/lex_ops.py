@@ -150,7 +150,7 @@ class LexicographicIndex:
 
     def general_map(
         self,
-        foo,
+        foo: numba.core.registry.CPUDispatcher,
         *foo_args,
         progress_proxy: ProgressBar | None = None,
         progress_step: int = 1,
@@ -196,6 +196,10 @@ class LexicographicIndex:
         assert has_varargs(foo), "`foo` needs `*args`."
 
         assert len(self.idx) > 1, "No chunks present."
+
+        assert isinstance(
+            foo, numba.core.registry.CPUDispatcher
+        ), "Only numba jitted functions accepted."
 
         foo_args = tuple(map(cast_to_array_if_possible, foo_args))
 
