@@ -57,34 +57,37 @@ def general_parallel_map(
             progress_proxy.update(progress_step)
 
 
-@numba.njit(parallel=True)
-def general_parallel_map(
-    foo: numba.core.registry.CPUDispatcher,
-    indices: npt.NDArray,
-    progress_proxy: ProgressBar | None = None,
-    progress_step: int = 1,
-    *foo_args,
-) -> None:
-    """General spread of independent tasks unto threads.
+__ARG_NO__ = 5
 
-    Assumptions on foo:
-        * accepts current chunk number `i` and table of indices `indices`.
-        * handles saving of the results itself (output_array among *foo_args)
-    """
-    for i in numba.prange(len(indices) - 1):
-        foo(i, indices, *foo_args)
-        if progress_proxy is not None:
-            progress_proxy.update(progress_step)
+
+@numba.njit
+def eval_on_views(
+    start_idx, stop_idx, foo, a0=None, a1=None, a2=None, a3=None, a4=None, *foo_args
+):
+    """Disgusting workaround to make it possible to run numba on multiple variadic inputs."""
+    return foo(
+        a0[start_idx:stop_idx] if a0 is not None else None,
+        a1[start_idx:stop_idx] if a1 is not None else None,
+        a2[start_idx:stop_idx] if a2 is not None else None,
+        a3[start_idx:stop_idx] if a3 is not None else None,
+        a4[start_idx:stop_idx] if a4 is not None else None,
+        *foo_args,
+    )
 
 
 @numba.njit(parallel=True)
-def simple_parallel_map(
+def simplest_parallel_map(
     outputs: npt.NDArray,
     indices: npt.NDArray,
     foo: numba.core.registry.CPUDispatcher,
-    *foo_args,
     progress_proxy: ProgressBar | None = None,
     progress_step: int = 1,
+    a0: npt.NDArray | None = None,
+    a1: npt.NDArray | None = None,
+    a2: npt.NDArray | None = None,
+    a3: npt.NDArray | None = None,
+    a4: npt.NDArray | None = None,
+    *foo_args,
 ) -> None:
     """Simple spread of independent tasks unto threads.
 
@@ -98,85 +101,11 @@ def simple_parallel_map(
     for i in numba.prange(len(indices) - 1):
         start_idx = indices[i]
         stop_idx = indices[i + 1]
-        outputs[i] = foo(start_idx, stop_idx, *foo_args)
+        outputs[i] = eval_on_views(
+            start_idx, stop_idx, foo, a0, a1, a2, a3, a4, *foo_args
+        )
         if progress_proxy is not None:
             progress_proxy.update(progress_step)
-
-
-@numba.njit
-def eval_on_view(i, indices, arr, res, foo, *foo_args):
-    start_idx = indices[i]
-    stop_idx = indices[i + 1]
-    res[i] = foo(arr[start_idx:stop_idx], *foo_args)
-
-
-@numba.njit
-def eval_on_views_and_save(
-    i,
-    indices,
-    res,
-    foo,
-    arg0=None,
-    arg1=None,
-    arg2=None,
-    arg3=None,
-    arg4=None,
-    arg5=None,
-    arg6=None,
-    arg7=None,
-    arg8=None,
-    arg9=None,
-    *foo_args,
-) -> None:
-    """Disgusting workaround to make it possible to run numba on multiple variadic inputs."""
-    start_idx = indices[i]
-    stop_idx = indices[i + 1]
-    res[i] = foo(
-        arg0[start_idx:stop_idx] if arg0 is not None else None,
-        arg1[start_idx:stop_idx] if arg1 is not None else None,
-        arg2[start_idx:stop_idx] if arg2 is not None else None,
-        arg3[start_idx:stop_idx] if arg3 is not None else None,
-        arg4[start_idx:stop_idx] if arg4 is not None else None,
-        arg5[start_idx:stop_idx] if arg5 is not None else None,
-        arg6[start_idx:stop_idx] if arg6 is not None else None,
-        arg7[start_idx:stop_idx] if arg7 is not None else None,
-        arg8[start_idx:stop_idx] if arg8 is not None else None,
-        arg9[start_idx:stop_idx] if arg9 is not None else None,
-        *foo_args,
-    )
-
-
-@numba.njit
-def eval_on_views(
-    foo,
-    start_idx,
-    stop_idx,
-    arg0=None,
-    arg1=None,
-    arg2=None,
-    arg3=None,
-    arg4=None,
-    arg5=None,
-    arg6=None,
-    arg7=None,
-    arg8=None,
-    arg9=None,
-    *foo_args,
-):
-    """Disgusting workaround to make it possible to run numba on multiple variadic inputs."""
-    return foo(
-        arg0[start_idx:stop_idx] if arg0 is not None else None,
-        arg1[start_idx:stop_idx] if arg1 is not None else None,
-        arg2[start_idx:stop_idx] if arg2 is not None else None,
-        arg3[start_idx:stop_idx] if arg3 is not None else None,
-        arg4[start_idx:stop_idx] if arg4 is not None else None,
-        arg5[start_idx:stop_idx] if arg5 is not None else None,
-        arg6[start_idx:stop_idx] if arg6 is not None else None,
-        arg7[start_idx:stop_idx] if arg7 is not None else None,
-        arg8[start_idx:stop_idx] if arg8 is not None else None,
-        arg9[start_idx:stop_idx] if arg9 is not None else None,
-        *foo_args,
-    )
 
 
 def has_varargs(func):
@@ -246,11 +175,11 @@ class LexicographicIndex:
 
     def map(
         self,
-        foo: typing.Callable[..., npt.NDArray[NumpyType]],
+        foo: typing.Callable[..., npt.NDArray],
         *foo_args: npt.NDArray,
         progress_proxy: ProgressBar | None = None,
         progress_step: int = 1,
-    ) -> npt.NDArray[NumpyType]:
+    ) -> npt.NDArray:
         """
         This function will apply the user defined njit-compiled `foo` to chunks defined by isoquants of the index.
 
@@ -260,7 +189,9 @@ class LexicographicIndex:
             progress_proxy (ProgressBar|None): use external progress proxy.
             progress_step (int): Step for `progress_proxy.update`.
         """
-        assert len(foo_args) <= 10, f"`foo` must use less than 10 positional arguments."
+        assert (
+            len(foo_args) <= __ARG_NO__
+        ), f"`foo` accepts at most {__ARG_NO__} positional arguments."
 
         assert has_varargs(foo), "`foo` needs `*args`."
 
@@ -269,21 +200,31 @@ class LexicographicIndex:
         foo_args = tuple(map(cast_to_array_if_possible, foo_args))
 
         # using magic of interpretation for what statically typed advanced languages would do with finger in butt...
-        first_result = eval_on_views(foo, self.idx[0], self.idx[1], *foo_args)
+        first_result = eval_on_views(self.idx[0], self.idx[1], foo, *foo_args)
 
-        outputs = np.empty(
-            dtype=first_result.dtype,
-            shape=(len(self), len(first_result)),
-        )
+        if isinstance(first_result, np.ndarray):
+            shape = (len(self), len(first_result))
+            dtype = first_result.dtype
+        elif isinstance(first_result, int):
+            shape = len(self)
+            dtype = int
+        elif isinstance(first_result, float):
+            shape = len(self)
+            dtype = float
+        else:
+            raise NotImplementedError(
+                f".map not implemented for functions returning {type(first_result)}."
+            )
 
-        simple_parallel_map(
+        outputs = np.empty(dtype=dtype, shape=shape)
+
+        simplest_parallel_map(
             outputs,
             self.idx,
-            eval_on_views,  # foo
             foo,  # foo_args*
+            progress_proxy,
+            progress_step,
             *foo_args,  # foo_args*
-            progress_proxy=progress_proxy,
-            progress_step=progress_step,
         )
 
         assert outputs[0] == first_result, "First eval not the same as first in batch."
