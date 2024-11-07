@@ -57,12 +57,22 @@ def general_parallel_map(
             progress_proxy.update(progress_step)
 
 
-__ARG_NO__ = 5
+__ARG_NO__ = 7
 
 
 @numba.njit
 def eval_on_views(
-    start_idx, stop_idx, foo, a0=None, a1=None, a2=None, a3=None, a4=None, *foo_args
+    start_idx,
+    stop_idx,
+    foo,
+    a0=None,
+    a1=None,
+    a2=None,
+    a3=None,
+    a4=None,
+    a5=None,
+    a6=None,
+    *foo_args,
 ):
     """Disgusting workaround to make it possible to run numba on multiple variadic inputs."""
     return foo(
@@ -71,22 +81,19 @@ def eval_on_views(
         a2[start_idx:stop_idx] if a2 is not None else None,
         a3[start_idx:stop_idx] if a3 is not None else None,
         a4[start_idx:stop_idx] if a4 is not None else None,
+        a5[start_idx:stop_idx] if a4 is not None else None,
+        a6[start_idx:stop_idx] if a4 is not None else None,
         *foo_args,
     )
 
 
 @numba.njit(parallel=True)
-def simplest_parallel_map(
+def simple_parallel_map(
     outputs: npt.NDArray,
     indices: npt.NDArray,
     foo: numba.core.registry.CPUDispatcher,
     progress_proxy: ProgressBar | None = None,
     progress_step: int = 1,
-    a0: npt.NDArray | None = None,
-    a1: npt.NDArray | None = None,
-    a2: npt.NDArray | None = None,
-    a3: npt.NDArray | None = None,
-    a4: npt.NDArray | None = None,
     *foo_args,
 ) -> None:
     """Simple spread of independent tasks unto threads.
@@ -101,9 +108,7 @@ def simplest_parallel_map(
     for i in numba.prange(len(indices) - 1):
         start_idx = indices[i]
         stop_idx = indices[i + 1]
-        outputs[i] = eval_on_views(
-            start_idx, stop_idx, foo, a0, a1, a2, a3, a4, *foo_args
-        )
+        outputs[i] = eval_on_views(start_idx, stop_idx, foo, *foo_args)
         if progress_proxy is not None:
             progress_proxy.update(progress_step)
 
@@ -222,7 +227,7 @@ class LexicographicIndex:
 
         outputs = np.empty(dtype=dtype, shape=shape)
 
-        simplest_parallel_map(
+        simple_parallel_map(
             outputs,
             self.idx,
             foo,  # foo_args*
