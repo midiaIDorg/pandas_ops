@@ -212,7 +212,7 @@ class LexicographicIndex:
         first_result = eval_on_views(self.idx[0], self.idx[1], foo, *foo_args)
 
         if isinstance(first_result, np.ndarray):
-            shape = (len(self), len(first_result))
+            shape = (len(self), *first_result.shape)
             dtype = first_result.dtype
         elif isinstance(first_result, int):
             shape = len(self)
@@ -236,6 +236,8 @@ class LexicographicIndex:
             *foo_args,  # foo_args*
         )
 
-        assert outputs[0] == first_result, "First eval not the same as first in batch."
+        assert np.all(
+            outputs[0] == first_result
+        ), "First eval not the same as first in batch."
 
         return outputs

@@ -77,3 +77,17 @@ def test_map_results_correctness():
     assert np.all(
         map_res == pandas_res
     ), "Trivial groupby and LexicographicIndex do not return the same results."
+
+
+@numba.njit
+def make_matrix(a, b, *args):
+    return np.zeros(shape=(10, 20), dtype=np.int32)
+
+
+def test_mapping_function_with_nd_array_values():
+    test = TestLexicographicIndex()
+    assert test.lexidx.map(make_matrix, test.X.b, test.X.c).shape == (
+        len(test.lexidx),
+        10,
+        20,
+    )
