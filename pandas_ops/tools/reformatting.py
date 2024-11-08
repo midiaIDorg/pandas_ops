@@ -3,11 +3,11 @@ import shutil
 from collections import defaultdict
 
 import click
+from mmapped_df import DatasetWriter, open_new_dataset_dct
 from tqdm import tqdm
 
 import h5py
 import pandas as pd
-from mmapped_df import DatasetWriter, open_new_dataset_dct
 from opentimspy import OpenTIMS
 from pandas_ops.io import read_df, save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
@@ -68,9 +68,13 @@ def tdf_to_startrek(in_tdf, out_startrek, progressbar: str = ""):
                 DW.append_df(df)
 
 
-def trivial_translator(input: pathlib.Path, output: pathlib.Path) -> None:
+def trivial_translator(
+    input: pathlib.Path,
+    output: pathlib.Path,
+    **kwargs,
+) -> None:
     """Translate a supported input into output using full RAM copy as intermediary."""
-    save_df(read_df(input), output)
+    save_df(read_df(input, **kwargs), output)
 
 
 _translators: defaultdict = defaultdict(lambda: trivial_translator)
