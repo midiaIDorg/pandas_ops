@@ -23,17 +23,17 @@ dependencies = [
 ]
 
 [project.scripts]
-write_config = "tools.write_config:main"
-apply_sql_with_duckdb = "tools.apply_sql_with_duckdb:main"
-df_cat = "tools.df_cat:main"
-df_equal = "tools.df_equal:main"
-df_head = "tools.df_head:main"
-df_histogram = "tools.df_histogram:main"
-df_len = "tools.df_len:main"
-df_parsingstack = "tools.df_parsingstack:main"
-df_reformat = "tools.df_reformat:main"
-pandas_ops_run_sql_on_table = "tools.pandas_ops_run_sql_on_table:main"
-reformat_into_parquet = "tools.reformat_into_parquet:main"
+write_config = "pandas_ops.tools.write_config:main"
+apply_sql_with_duckdb = "pandas_ops.tools.apply_sql_with_duckdb:main"
+df_cat = "pandas_ops.tools.df_cat:main"
+df_equal = "pandas_ops.tools.df_equal:main"
+df_head = "pandas_ops.tools.df_head:main"
+df_histogram = "pandas_ops.tools.df_histogram:main"
+df_len = "pandas_ops.tools.df_len:main"
+df_parsingstack = "pandas_ops.tools.df_parsingstack:main"
+df_reformat = "pandas_ops.tools.df_reformat:main"
+pandas_ops_run_sql_on_table = "pandas_ops.tools.pandas_ops_run_sql_on_table:main"
+reformat_into_parquet = "pandas_ops.tools.reformat_into_parquet:main"
 
 
 [project.urls]
