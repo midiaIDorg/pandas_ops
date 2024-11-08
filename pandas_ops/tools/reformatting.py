@@ -19,7 +19,10 @@ from pandas_ops.parsers.misc import parse_key_equal_value
 # root = "raw/data"
 # hdf = h5py.File(in_hdf, mode="r")
 def hdf_to_startrek(
-    in_hdf: pathlib.Path, out_startrek: pathlib.Path, root: str = "/"
+    in_hdf: pathlib.Path,
+    out_startrek: pathlib.Path,
+    root: str = "/",
+    verbose: bool = False,
 ) -> None:
     """
     Translate an HDF-stored table into .startrek format column after column.
@@ -43,6 +46,8 @@ def hdf_to_startrek(
 
         df = open_new_dataset_dct(out_startrek, scheme, size)
         for column_name in rootgroup:
+            if verbose:
+                print(f"cp {root}/{column_name} {out_startrek}/{column_name}")
             df[column_name] = rootgroup[column_name][:]
 
 
@@ -59,10 +64,10 @@ _translators[(".hdf", ".startrek")] = hdf_to_startrek
 @click.argument("source", type=pathlib.Path)
 @click.argument("target", type=pathlib.Path)
 @click.option(
-    "--kwargs",
+    "--kwarg",
     multiple=True,
     help="Dynamic key-value pairs in key=value format.",
     type=parse_key_equal_value,
 )
-def reformat_table(source: pathlib.Path, target: pathlib.Path, kwargs=()):
-    _translators[(source.suffix, target.suffix)](source, target, **dict(kwargs))
+def reformat_table(source: pathlib.Path, target: pathlib.Path, kwarg=()):
+    _translators[(source.suffix, target.suffix)](source, target, **dict(kwarg))
