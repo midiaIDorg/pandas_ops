@@ -1,11 +1,14 @@
 import pathlib
+import shutil
 from collections import defaultdict
 
 import click
+from tqdm import tqdm
 
 import h5py
 import pandas as pd
-from mmapped_df import open_new_dataset_dct
+from mmapped_df import DatasetWriter, open_new_dataset_dct
+from opentimspy import OpenTIMS
 from pandas_ops.io import read_df, save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
 
@@ -30,7 +33,6 @@ def hdf_to_startrek(
     with h5py.File(in_hdf, mode="r") as hdf:
         rootgroup = hdf[root]
         scheme = {}
-
         prev_size = None
         prev_column_name = ""
         for column_name in rootgroup:
@@ -51,6 +53,21 @@ def hdf_to_startrek(
             df[column_name] = rootgroup[column_name][:]
 
 
+# in_tdf = pathlib.Path(
+#     "/home/matteo/Projects/midia/pipelines/devel/midia_pipe/spectra/G8045.d"
+# )
+# out_startrek = pathlib.Path("~/G8045.startrek")
+def tdf_to_startrek(in_tdf, out_startrek, progressbar: str = ""):
+    with OpenTIMS(in_tdf) as OT:
+        with DatasetWriter(out_startrek) as DW:
+            frames = OT
+            if progressbar:
+                frames = tqdm(OT, total=len(OT.frames["Id"]), desc=progressbar)
+            for frame in frames:
+                df = pd.DataFrame(frame, copy=False)
+                DW.append_df(df)
+
+
 def trivial_translator(input: pathlib.Path, output: pathlib.Path) -> None:
     """Translate a supported input into output using full RAM copy as intermediary."""
     save_df(read_df(input), output)
@@ -58,16 +75,25 @@ def trivial_translator(input: pathlib.Path, output: pathlib.Path) -> None:
 
 _translators: defaultdict = defaultdict(lambda: trivial_translator)
 _translators[(".hdf", ".startrek")] = hdf_to_startrek
+_translators[(".d", ".startrek")] = tdf_to_startrek
 
 
 @click.command(context_settings={"show_default": True})
 @click.argument("source", type=pathlib.Path)
 @click.argument("target", type=pathlib.Path)
+@click.option("--force", help="Remove target if it exists.", is_flag=True)
 @click.option(
     "--kwarg",
     multiple=True,
     help="Dynamic key-value pairs in key=value format.",
     type=parse_key_equal_value,
 )
-def reformat_table(source: pathlib.Path, target: pathlib.Path, kwarg=()):
+def reformat_table(
+    source: pathlib.Path,
+    target: pathlib.Path,
+    force: bool = False,
+    kwarg=(),
+):
+    if force:
+        shutil.rmtree(target, ignore_errors=True)
     _translators[(source.suffix, target.suffix)](source, target, **dict(kwarg))
