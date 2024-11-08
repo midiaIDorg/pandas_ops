@@ -18,7 +18,7 @@ from pandas_ops.parsers.misc import parse_key_equal_value
 # in_hdf = pathlib.Path(
 #     "/home/matteo/Projects/midia/pipelines/devel/midia_pipe/tmp/clusters/tims/1fd37e91592/precursor/25/clusters.hdf"
 # )
-# out_startrek = pathlib.Path("/tmp/clusters.startrek")
+# out_startrek = pathlib.Path("~/clusters.startrek")
 # root = "raw/data"
 # hdf = h5py.File(in_hdf, mode="r")
 def hdf_to_startrek(
@@ -50,7 +50,7 @@ def hdf_to_startrek(
         for column_name in rootgroup:
             if verbose:
                 print(f"cp {root}/{column_name} {out_startrek}/{column_name}")
-            df[column_name] = rootgroup[column_name][:]
+            df[column_name][:] = rootgroup[column_name][:]
 
 
 # in_tdf = pathlib.Path(
