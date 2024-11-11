@@ -33,6 +33,7 @@ df_len = "pandas_ops.tools.df_len:main"
 df_parsingstack = "pandas_ops.tools.df_parsingstack:main"
 pandas_ops_run_sql_on_table = "pandas_ops.tools.pandas_ops_run_sql_on_table:main"
 reformat_table = "pandas_ops.tools.reformatting:reformat_table"
+df_concat = "pandas_ops.tools.df_manipulation:df_concat"
 
 [project.urls]
 homepage="https://github.com/midiaIDorg/pandas_ops.git"
