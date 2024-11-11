@@ -4,8 +4,9 @@ import warnings
 from functools import partial
 from pathlib import Path
 
-import h5py
 import mmapped_df
+
+import h5py
 import pandas as pd
 import pandas.errors
 from pyarrow import ArrowInvalid
@@ -46,7 +47,7 @@ __ext_to_reader = {
     ".pandas_hdf": add_kwargs(pd.read_hdf),
     ".hdf": hdf2df,
     ".parquet": add_kwargs(pd.read_parquet),
-    ".startrek": add_kwargs(mmapped_df.open_dataset),
+    ".startrek": mmapped_df.open_dataset,
 }
 
 __ext_to_methodName = {
