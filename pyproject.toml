@@ -31,7 +31,7 @@ df_head = "pandas_ops.tools.df_head:main"
 df_histogram = "pandas_ops.tools.df_histogram:main"
 df_len = "pandas_ops.tools.df_len:main"
 df_parsingstack = "pandas_ops.tools.df_parsingstack:main"
-pandas_ops_run_sql_on_table = "pandas_ops.tools.pandas_ops_run_sql_on_table:main"
+apply_sql = "pandas_ops.tools.df_manipulation:apply_sql"
 reformat_table = "pandas_ops.tools.reformatting:reformat_table"
 df_concat = "pandas_ops.tools.df_manipulation:df_concat"
 
