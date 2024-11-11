@@ -18,10 +18,17 @@ from pandas_ops.sortedness import is_strictly_increasing
 
 
 @numba.njit(parallel=True)
-def get_changes(arr: npt.NDArray, res: npt.NDArray[np.bool_]):
+def get_changes(
+    arr: npt.NDArray,
+    res: npt.NDArray[np.bool_],
+    progress_proxy: ProgressBar | None = None,
+    progress_step: int = 1,
+):
     assert len(arr) == len(res)
     for i in numba.prange(1, len(arr)):
         res[i] = arr[i] != arr[i - 1] | res[i]
+        if progress_proxy is not None:
+            progress_proxy.update(progress_step)
 
 
 @numba.njit
@@ -129,26 +136,31 @@ class LexicographicIndex:
     Build up an index mapping a lexicographically sorted dataset into contiguous chunks.
     """
 
-    def __init__(self, *columns: npt.NDArray):
+    def __init__(
+        self,
+        *columns: npt.NDArray,
+        progress_proxy: ProgressBar | None = None,
+        progress_step: int = 1,
+    ):
         idxs = np.zeros(shape=len(columns[0]), dtype=np.bool_)
         idxs[0] = True
         for i in range(len(columns)):
-            get_changes(columns[i], idxs)
+            get_changes(columns[i], idxs, progress_proxy, progress_step)
         self.idx = np.array(get_change_idxs(idxs), dtype=np.uint32)
         assert len(self.idx) > 0, "Produced an empty index."
         assert len(self.idx) > 1, "No chunks present."
         assert is_strictly_increasing(self.idx), "Index not strictly increasing. ABORT"
 
     @classmethod
-    def from_df(cls, df: pd.DataFrame) -> LexicographicIndex:
-        return cls(*[df[c].to_numpy() for c in df.columns])
+    def from_df(cls, df: pd.DataFrame, **kwargs) -> LexicographicIndex:
+        return cls(*[df[c].to_numpy() for c in df.columns], **kwargs)
 
     @classmethod
-    def from_array(cls, arr: npt.NDArray) -> LexicographicIndex:
+    def from_array(cls, arr: npt.NDArray, **kwargs) -> LexicographicIndex:
         assert (
             len(arr.shape) == 2
         ), "Can instantiate LexicographicIndex from 2D arrays only."
-        return cls(*[arr[:, j] for j in range(arr.shape[1])])
+        return cls(*[arr[:, j] for j in range(arr.shape[1])], **kwargs)
 
     def __len__(self) -> int:
         return len(self.idx) - 1
@@ -220,6 +232,11 @@ class LexicographicIndex:
         elif isinstance(first_result, float):
             shape = len(self)
             dtype = float
+        elif isinstance(first_result, tuple) and all(
+            isinstance(e, (float, int)) for e in first_result
+        ):
+            shape = (len(self), len(first_result))
+            dtype = int if all(isinstance(e, int) for e in first_result) else float
         else:
             raise NotImplementedError(
                 f".map not implemented for functions returning {type(first_result)}."
@@ -241,3 +258,9 @@ class LexicographicIndex:
         ), "First eval not the same as first in batch."
 
         return outputs
+
+    def group_sizes(self):
+        return np.diff(self.idx)
+
+    def unique_idxs(self):
+        return self.idx[:-1]
