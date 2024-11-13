@@ -171,7 +171,7 @@ class LexicographicIndex:
         *foo_args,
         progress_proxy: ProgressBar | None = None,
         progress_step: int = 1,
-    ):
+    ) -> None:
         """
         Apply `foo` that is `general_parallel_map` compatible, in as much as:
 
@@ -189,6 +189,23 @@ class LexicographicIndex:
             progress_step (int): Step for `progress_proxy.update`.
         """
         general_parallel_map(foo, self.idx, progress_proxy, progress_step, *foo_args)
+
+    def simple_parallel_map(
+        self,
+        outputs: npt.NDArray,
+        foo: numba.core.registry.CPUDispatcher,
+        progress_proxy: ProgressBar | None = None,
+        progress_step: int = 1,
+        *foo_args,
+    ) -> None:
+        simple_parallel_map(
+            outputs,
+            self.idx,
+            foo,
+            progress_proxy=progress_proxy,
+            progress_step=progress_step,
+            *foo_args,
+        )
 
     def map(
         self,

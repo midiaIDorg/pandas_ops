@@ -1,13 +1,21 @@
 import json
 from pathlib import Path
+from warnings import warn
 
 import click
 
 import duckdb
+import numpy as np
 import pandas as pd
 import tomllib
 from pandas_ops.io import read_df, save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
+
+output_path = "/tmp/combined_cluster_stats.parquet"
+input_paths = (
+    Path("tmp/clusters/tims/reformated/49/cluster_stats.parquet"),
+    Path("tmp/clusters/tims/reformated/34/additional_cluster_stats.parquet"),
+)
 
 
 @click.command(context_settings={"show_default": True})
@@ -21,8 +29,19 @@ def df_concat(output_path: Path, input_paths: list[Path]) -> None:
         output_path (pathlib.Path): Where to store outputs.\n
         input_path (list[pathlib.Path]): Which tables to concatenate.
     """
-    in_dfs = (read_df(in_path) for in_path in input_paths)
-    out_df = pd.concat(in_dfs, axis=1)
+    assert len(input_paths) > 1, "Makes no sense to merge 1 table."
+    input_paths = list(input_paths)
+    first_path = input_paths.pop()
+    out_df = read_df(first_path)
+    for in_path in input_paths:
+        in_df = read_df(in_path)
+        for col in in_df:
+            if col not in out_df:
+                out_df[col] = in_df[col]
+            else:
+                assert np.all(
+                    out_df[col] == in_df[col]
+                ), f"Column `{col}` takes different values in `{first_path}` and `{in_path}`."
     save_df(out_df, output_path)
 
 
