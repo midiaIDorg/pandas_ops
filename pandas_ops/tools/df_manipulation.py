@@ -47,10 +47,10 @@ def df_concat(output_path: Path, input_paths: list[Path]) -> None:
 
 @click.command(context_settings={"show_default": True})
 @click.argument("source_path", type=Path)
-@click.argument("config_path", type=Path)
+@click.argument("config_path_or_sql_str", type=str)
 @click.argument("target_path", type=Path)
-def apply_sql(source_path: Path, config_path: Path, target_path: Path):
-    with open(config_path, "rb") as f:
+def apply_sql(source_path: Path, config_path_or_sql_str: str, target_path: Path):
+    with open(config_path_or_sql_str, "rb") as f:
         config: dict = tomllib.load(f)
 
     duckcon = duckdb.connect()
