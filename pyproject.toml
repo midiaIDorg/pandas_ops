@@ -12,6 +12,7 @@ authors=[
     {name="Michał Piotr Startek",email="michalsta@mimuw.edu.pl"},
 ]
 dependencies = [
+    "click",
     "numpy",
     "numba",
     "numba_progress",
