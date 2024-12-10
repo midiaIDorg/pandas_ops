@@ -116,11 +116,7 @@ def run_general_sql(
 
     formatted_sql = sql.format(**name_to_param)
     if verbose:
-        print()
-        print(name_to_param)
-        print()
         pprint(formatted_sql)
-        print()
 
     duckcon = duckdb.connect()
 
