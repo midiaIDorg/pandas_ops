@@ -6,6 +6,7 @@ Potential generalization:
     * this would enable operations on multiple tables.
 
 """
+import argparse
 from pathlib import Path
 from pprint import pprint
 
