@@ -76,13 +76,11 @@ def apply_sql(source_path: Path, config_path_or_sql_str: str, target_path: Path)
 )
 @click.option("--source", default=None, help="Source table.")
 @click.option("--target", default=None, help="Target table.")
-@click.option("--verbose", is_flag=True, help="Make verbose.")
 def run_general_sql(
     config_path_or_sql_str: str,
     param: tuple[tuple[str, str], ...],
     source: str | None = None,
     target: str | None = None,
-    verbose: bool = False,
 ) -> None:
     """Run a general sql.
 
@@ -92,7 +90,6 @@ def run_general_sql(
         param: A tuple of tuples of form (<parameter name>,<parameter value>).\n
         source: An (optional) source of the table. Overrides one passed in as `-p source ...`.\n
         target: An (optional) target for the sql result. Overrides one passed in as `-p target ...`.\n
-        verbose: Be verbose.
     """
     name_to_param = dict(param)
 
@@ -115,16 +112,21 @@ def run_general_sql(
             name_to_param["source"] = "source_table"
 
     formatted_sql = sql.format(**name_to_param)
-    if verbose:
-        pprint(formatted_sql)
-
     duckcon = duckdb.connect()
 
     if "target" in name_to_param:  # only to write to .startrek.
         target_path = Path(name_to_param["target"])
+        df = duckcon.query(formatted_sql).df()
+
         if target_path.suffix in duckdb_nonnative_formats:
-            df = duckcon.query(formatted_sql).df()
             save_df(df, target_path)
-            sys.exit(0)
+
+        if name_to_param["target"] == "csv":
+            df.to_csv(sys.stdout, index=False)
+
+        if name_to_param["target"] == "json":
+            df.to_json(sys.stdout, orient="records", lines=True, indent=4)
+
+        sys.exit(0)
 
     duckcon.query(formatted_sql)
