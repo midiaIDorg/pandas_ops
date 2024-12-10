@@ -36,6 +36,7 @@ apply_sql = "pandas_ops.tools.df_manipulation:apply_sql"
 reformat_table = "pandas_ops.tools.reformatting:reformat_table"
 df_concat = "pandas_ops.tools.df_manipulation:df_concat"
 echotoml = "pandas_ops.tools.echotoml:echotoml"
+run_general_sql = "pandas_ops.tools.df_manipulation:run_general_sql"
 
 [project.urls]
 homepage="https://github.com/midiaIDorg/pandas_ops.git"

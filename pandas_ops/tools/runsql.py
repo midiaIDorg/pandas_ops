@@ -6,13 +6,11 @@ Potential generalization:
     * this would enable operations on multiple tables.
 
 """
-import argparse
-import json
 from pathlib import Path
 from pprint import pprint
 
+import click
 import duckdb
-from pandas_ops.misc import in_ipython
 
 import tomllib
 
@@ -30,31 +28,7 @@ class KeyValueAction(argparse.Action):
         setattr(namespace, self.dest, self.kv_dict)
 
 
-if in_ipython():
-    from IPython import get_ipython
-
-    get_ipython().run_line_magic("load_ext", "autoreload")
-    get_ipython().run_line_magic("autoreload", "2")
-
-    class args:
-        named_paths = dict(
-            source="partial/G8027/G8045/MS1@tims@08f35c4405b@default@fast@default@MS2@tims@29f95c3131e@default@fast@default/matcher@prtree@narrow/rough@default/1stSearch@sage@95c2993@p12f15nd/fasta@3/results.sage.tsv",
-            target="/tmp/filtered.sage.results.parquet",
-        )
-        config = "configs/search/output_filters/sage/default.toml"
-        sql = None
-        verbose = True
-
-    class args:
-        named_paths = dict(
-            source="outputs/doubleSageWithCheese/G8027/G8045/sage/second_gen/mz_recalibration_edge_refinement/precursors_without_multiply_assigned_fragments.parquet",
-            target="/tmp/stripped_sequences.csv",
-        )
-        config = "configs/search/output_filters/sage/strip_sequences.toml"
-        sql = None
-        verbose = True
-
-else:
+def main():
     parser = argparse.ArgumentParser(description="Perform SQL on tables.")
     parser.add_argument(
         "--named_path",
@@ -77,12 +51,6 @@ else:
     )
     parser.add_argument("--verbose", action="store_true", help="Be more verbose")
     args = parser.parse_args()
-    from pprint import pprint
-
-    pprint(args.__dict__)
-
-
-def main(args):
     assert (args.config is None) ^ (
         args.sql is None
     ), "Provide EITHER an sql or a path to the config toml, not both, not none."
@@ -91,7 +59,7 @@ def main(args):
             config = tomllib.load(h)
         sql = config["filter"].format(**args.named_path)
     else:
-        sql = args.sql.format(source=args.source, target=args.target)
+        sql = args.sql.format(**args.named_path)
 
     if args.verbose:
         from pprint import pprint
@@ -102,4 +70,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(args)
+    main()

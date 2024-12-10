@@ -1,16 +1,19 @@
 import json
+import sys
 from pathlib import Path
+from pprint import pprint
 from warnings import warn
 
 import click
-
 import duckdb
 import numpy as np
 import pandas as pd
-import tomllib
 from pandas_ops.io import read_df, save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
 
+import tomllib
+
+duckdb_nonnative_formats = (".startrek",)
 output_path = "/tmp/combined_cluster_stats.parquet"
 input_paths = (
     Path("tmp/clusters/tims/reformated/49/cluster_stats.parquet"),
@@ -60,3 +63,72 @@ def apply_sql(source_path: Path, config_path_or_sql_str: str, target_path: Path)
 
     query = config["sql"].format(source=source_path, target=target_path)
     duckcon.execute(query)
+
+
+@click.command(context_settings={"show_default": True})
+@click.argument("config_path_or_sql_str", type=str)
+@click.option(
+    "--param",
+    "-p",
+    type=(str, str),
+    multiple=True,
+    help="Pass in name of the parameter and value tuples.",
+)
+@click.option("--source", default=None, help="Source table.")
+@click.option("--target", default=None, help="Target table.")
+@click.option("--verbose", is_flag=True, help="Make verbose.")
+def run_general_sql(
+    config_path_or_sql_str: str,
+    param: tuple[tuple[str, str], ...],
+    source: str | None = None,
+    target: str | None = None,
+    verbose: bool = False,
+) -> None:
+    """Run a general sql.
+
+    Arguments:
+
+        config_path_or_sql_str: A path to the config. If not found, literally using as sql.\n
+        param: A tuple of tuples of form (<parameter name>,<parameter value>).\n
+        source: An (optional) source of the table. Overrides one passed in as `-p source ...`.\n
+        target: An (optional) target for the sql result. Overrides one passed in as `-p target ...`.\n
+        verbose: Be verbose.
+    """
+    name_to_param = dict(param)
+
+    try:
+        with open(config_path_or_sql_str, "rb") as f:
+            config: dict = tomllib.load(f)
+        sql = config["sql"]
+    except FileNotFoundError:
+        sql = config_path_or_sql_str
+
+    if source is not None:
+        name_to_param["source"] = source
+    if target is not None:
+        name_to_param["target"] = target
+
+    if "source" in name_to_param:
+        source = Path(name_to_param["source"])
+        if source.suffix in duckdb_nonnative_formats:
+            source_table = read_df(source)
+            name_to_param["source"] = "source_table"
+
+    formatted_sql = sql.format(**name_to_param)
+    if verbose:
+        print()
+        print(name_to_param)
+        print()
+        pprint(formatted_sql)
+        print()
+
+    duckcon = duckdb.connect()
+
+    if "target" in name_to_param:  # only to write to .startrek.
+        target_path = Path(name_to_param["target"])
+        if target_path.suffix in duckdb_nonnative_formats:
+            df = duckcon.query(formatted_sql).df()
+            save_df(df, target_path)
+            sys.exit(0)
+
+    duckcon.query(formatted_sql)
