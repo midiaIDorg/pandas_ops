@@ -5,13 +5,13 @@ from pprint import pprint
 from warnings import warn
 
 import click
+
 import duckdb
 import numpy as np
 import pandas as pd
+import tomllib
 from pandas_ops.io import read_df, save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
-
-import tomllib
 
 duckdb_nonnative_formats = (".startrek",)
 output_path = "/tmp/combined_cluster_stats.parquet"
@@ -112,21 +112,13 @@ def run_general_sql(
             name_to_param["source"] = "source_table"
 
     formatted_sql = sql.format(**name_to_param)
+
+    pprint(formatted_sql)
     duckcon = duckdb.connect()
 
     if "target" in name_to_param:  # only to write to .startrek.
         target_path = Path(name_to_param["target"])
         df = duckcon.query(formatted_sql).df()
-
-        if target_path.suffix in duckdb_nonnative_formats:
-            save_df(df, target_path)
-
-        if name_to_param["target"] == "csv":
-            df.to_csv(sys.stdout, index=False)
-
-        if name_to_param["target"] == "json":
-            df.to_json(sys.stdout, orient="records", lines=True, indent=4)
-
-        sys.exit(0)
-
-    duckcon.query(formatted_sql)
+        save_df(df, target_path)
+    else:
+        duckcon.query(formatted_sql)
