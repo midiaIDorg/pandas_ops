@@ -22,6 +22,7 @@ def sum_real_good(xx: npt.NDArray, *args):
 def weighted_mean_and_var(
     xx: npt.NDArray, weights: npt.NDArray, *args
 ) -> tuple[float, float]:
+    weights = weights.astype(np.float64) / weights.sum()
     _weighted_mean = np.average(
         xx,
         weights=weights,

@@ -86,7 +86,7 @@ def run_general_sql(
 
     Arguments:
 
-        config_path_or_sql_str: A path to the config. If not found, literally using as sql.\n
+        config_path_or_sql_str: A path to the config. If not found, literally call the passed in string as sql.\n
         param: A tuple of tuples of form (<parameter name>,<parameter value>).\n
         source: An (optional) source of the table. Overrides one passed in as `-p source ...`.\n
         target: An (optional) target for the sql result. Overrides one passed in as `-p target ...`.\n
