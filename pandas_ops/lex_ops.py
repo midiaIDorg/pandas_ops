@@ -213,6 +213,7 @@ class LexicographicIndex:
         *foo_args: npt.NDArray,
         progress_proxy: ProgressBar | None = None,
         progress_step: int = 1,
+        do_assertions: bool = True,
     ) -> npt.NDArray:
         """
         This function will apply the user defined njit-compiled `foo` to chunks defined by isoquants of the index.
@@ -223,9 +224,10 @@ class LexicographicIndex:
             progress_proxy (ProgressBar|None): use external progress proxy.
             progress_step (int): Step for `progress_proxy.update`.
         """
-        assert (
-            len(foo_args) <= __ARG_NO__
-        ), f"`foo` accepts at most {__ARG_NO__} positional arguments."
+        if do_assertions:
+            assert (
+                len(foo_args) <= __ARG_NO__
+            ), f"`foo` accepts at most {__ARG_NO__} positional arguments."
 
         assert has_varargs(foo), "`foo` needs `*args`."
 
@@ -270,9 +272,10 @@ class LexicographicIndex:
             *foo_args,  # foo_args*
         )
 
-        assert np.all(
-            outputs[0] == first_result
-        ), "First eval not the same as first in batch."
+        if do_assertions:
+            assert np.all(
+                outputs[0] == first_result
+            ), "First eval not the same as first in batch."
 
         return outputs
 

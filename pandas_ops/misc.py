@@ -94,3 +94,19 @@ def cast_to_array_if_possible(arg):
         return arg.to_numpy()
     except AttributeError:
         return arg
+
+
+def indexed_long_df_to_tensor(long_df: pd.DataFrame, dtype=np.float64) -> npt.NDArray:
+    """Transform a long sparse formated data into a tensor.
+
+    Arguments:
+        long_df (pd.DataFrame): A dataframe with row multiindex corresponding to indices of the output tensor.
+
+    Returns:
+        npt.NDArray: A dense tensor with with first dims corresponding to the input's index and last dim storing the values.
+    """
+    maxes = long_df.index.to_frame().apply(max)
+    idx_to_values = np.zeros(shape=(*(maxes + 1), len(long_df.columns)), dtype=dtype)
+    for idx, params in long_df.iterrows():
+        idx_to_values[idx] = params
+    return idx_to_values
