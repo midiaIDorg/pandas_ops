@@ -120,6 +120,32 @@ def simple_parallel_map(
             progress_proxy.update(progress_step)
 
 
+@numba.njit(parallel=True)
+def simpler_parallel_map(
+    outputs: npt.NDArray,
+    indices: npt.NDArray,
+    foo: numba.core.registry.CPUDispatcher,
+    progress_proxy: ProgressBar | None = None,
+    progress_step: int = 1,
+    *foo_args,
+) -> None:
+    """Simple spread of independent tasks unto threads.
+
+    Assumptions on foo:
+        * accepts start_idx and stop_idx as first two args
+        * returns a 1D numpy array.
+    """
+    assert (
+        len(outputs) == len(indices) - 1
+    ), "Size of outputs incompatible with expected number of chunks."
+    for i in numba.prange(len(indices) - 1):
+        start_idx = indices[i]
+        stop_idx = indices[i + 1]
+        outputs[i] = foo(*foo_args, start_idx, stop_idx)
+        if progress_proxy is not None:
+            progress_proxy.update(progress_step)
+
+
 def has_varargs(func):
     """Check if any parameter of func is a var-positional (*args) type"""
     for param in inspect.signature(func).parameters.values():
@@ -224,10 +250,10 @@ class LexicographicIndex:
             progress_proxy (ProgressBar|None): use external progress proxy.
             progress_step (int): Step for `progress_proxy.update`.
         """
-        if do_assertions:
-            assert (
-                len(foo_args) <= __ARG_NO__
-            ), f"`foo` accepts at most {__ARG_NO__} positional arguments."
+        # if do_assertions:
+        #     assert (
+        #         len(foo_args) <= __ARG_NO__
+        #     ), f"`foo` accepts at most {__ARG_NO__} positional arguments."
 
         assert has_varargs(foo), "`foo` needs `*args`."
 
@@ -279,8 +305,85 @@ class LexicographicIndex:
 
         return outputs
 
+    def simpler_map(
+        self,
+        foo: typing.Callable[..., npt.NDArray],
+        *foo_args: npt.NDArray,
+        progress_proxy: ProgressBar | None = None,
+        progress_step: int = 1,
+        do_assertions: bool = True,
+    ) -> npt.NDArray:
+        """
+        This function makes the function make sure it selected right range of inputs.
+
+        Arguments:
+            foo: njitted function.
+            *foo_args: positional arguments to the function.
+            progress_proxy (ProgressBar|None): use external progress proxy.
+            progress_step (int): Step for `progress_proxy.update`.
+        """
+        assert len(self.idx) > 1, "No chunks present."
+        assert isinstance(
+            foo, numba.core.registry.CPUDispatcher
+        ), "Only numba jitted functions accepted."
+        foo_args = tuple(map(cast_to_array_if_possible, foo_args))
+
+        arg_names = [param.name for param in inspect.signature(foo).parameters.values()]
+
+        assert (
+            "start_idx" == arg_names[-2]
+        ), "precursor predictor `foo` must use argument `start_idx` as penultimate argument."
+        assert (
+            "stop_idx" == arg_names[-1]
+        ), "precursor predictor `foo` must use argument `stop_idx` as ultimate argument."
+
+        # using magic of interpretation for what statically typed advanced languages would do with finger in butt...
+        first_result = foo(*foo_args, self.idx[0], self.idx[1])
+
+        if isinstance(first_result, np.ndarray):
+            shape = (len(self), *first_result.shape)
+            dtype = first_result.dtype
+        elif isinstance(first_result, int):
+            shape = len(self)
+            dtype = int
+        elif isinstance(first_result, float):
+            shape = len(self)
+            dtype = float
+        elif isinstance(first_result, tuple):
+            raise NotImplementedError(
+                f"`foo` cannot return a tuple. For multiple outputs, make sure they are returned as a numpy array."
+            )
+        else:
+            raise NotImplementedError(
+                f".map not implemented for functions returning {type(first_result)}."
+            )
+
+        outputs = np.empty(dtype=dtype, shape=shape)
+
+        simpler_parallel_map(
+            outputs,
+            self.idx,
+            foo,  # foo_args*
+            progress_proxy,
+            progress_step,
+            *foo_args,  # foo_args*
+        )
+        if do_assertions:
+            assert np.all(
+                outputs[0] == first_result
+            ), "First eval not the same as first in batch."
+
+        return outputs
+
     def group_sizes(self):
         return np.diff(self.idx)
 
     def unique_idxs(self):
         return self.idx[:-1]
+
+    def start_end(self, idx):
+        """Extract the start and end indices in the contiguous group."""
+        assert idx >= 0
+        assert idx < len(self)
+        start, end = map(int, self.idx[idx : idx + 2])
+        return start, end

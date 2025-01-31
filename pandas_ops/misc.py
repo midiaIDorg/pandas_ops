@@ -2,6 +2,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from collections import namedtuple
 
 
 def hstack_dfs(*dfs: pd.DataFrame) -> pd.DataFrame:
@@ -110,3 +111,7 @@ def indexed_long_df_to_tensor(long_df: pd.DataFrame, dtype=np.float64) -> npt.ND
     for idx, params in long_df.iterrows():
         idx_to_values[idx] = params
     return idx_to_values
+
+
+def df2dt(df):
+    return namedtuple("dt", df.columns)(**{c: df[c].to_numpy() for c in df.columns})

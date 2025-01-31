@@ -51,3 +51,7 @@ def count2D(
         cnts[xx[i], yy[i]] += 1
 
     return cnts, min_x, max_x, min_y, max_y
+
+
+def quantiles(xx, bin_cnt=5):
+    return np.quantile(xx, np.linspace(0, 1, bin_cnt + 1))
