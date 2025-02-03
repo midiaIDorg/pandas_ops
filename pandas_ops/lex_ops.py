@@ -332,13 +332,13 @@ class LexicographicIndex:
 
         assert (
             "start_idx" == arg_names[-2]
-        ), "precursor predictor `foo` must use argument `start_idx` as penultimate argument."
+        ), "precursor predictor `foo` must use argument `start_idx` as penultimate argument. You should not provide it here explicitly."
         assert (
             "stop_idx" == arg_names[-1]
-        ), "precursor predictor `foo` must use argument `stop_idx` as ultimate argument."
+        ), "precursor predictor `foo` must use argument `stop_idx` as ultimate argument. You should not provide it here explicitly."
 
         # using magic of interpretation for what statically typed advanced languages would do with finger in butt...
-        first_result = foo(*foo_args, self.idx[0], self.idx[1])
+        first_result = foo(*foo_args, start_idx=self.idx[0], stop_idx=self.idx[1])
 
         if isinstance(first_result, np.ndarray):
             shape = (len(self), *first_result.shape)
