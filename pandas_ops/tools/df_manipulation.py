@@ -1,5 +1,6 @@
 import json
 import sys
+
 from pathlib import Path
 from pprint import pprint
 from warnings import warn
@@ -10,7 +11,9 @@ import duckdb
 import numpy as np
 import pandas as pd
 import tomllib
-from pandas_ops.io import read_df, save_df
+
+from pandas_ops.io import read_df
+from pandas_ops.io import save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
 
 duckdb_nonnative_formats = (".startrek",)
@@ -76,11 +79,13 @@ def apply_sql(source_path: Path, config_path_or_sql_str: str, target_path: Path)
 )
 @click.option("--source", default=None, help="Source table.")
 @click.option("--target", default=None, help="Target table.")
+@click.option("--verbose", is_flag=True, help="Be more verbose.")
 def run_general_sql(
     config_path_or_sql_str: str,
     param: tuple[tuple[str, str], ...],
     source: str | None = None,
     target: str | None = None,
+    verbose: bool = False,
 ) -> None:
     """Run a general sql.
 
@@ -92,6 +97,9 @@ def run_general_sql(
         target: An (optional) target for the sql result. Overrides one passed in as `-p target ...`.\n
     """
     name_to_param = dict(param)
+
+    if verbose:
+        pprint(name_to_param)
 
     try:
         with open(config_path_or_sql_str, "rb") as f:
@@ -112,8 +120,9 @@ def run_general_sql(
             name_to_param["source"] = "source_table"
 
     formatted_sql = sql.format(**name_to_param)
+    if verbose:
+        pprint(formatted_sql)
 
-    pprint(formatted_sql)
     duckcon = duckdb.connect()
 
     if "target" in name_to_param:  # only to write to .startrek.
@@ -122,3 +131,6 @@ def run_general_sql(
         save_df(df, target_path)
     else:
         duckcon.query(formatted_sql)
+
+    if verbose:
+        print("Done! Go play openrct2 or fheroes2.")
