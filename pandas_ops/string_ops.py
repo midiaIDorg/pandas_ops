@@ -4,17 +4,21 @@ from itertools import product
 
 from pathlib import Path
 
+import typing
+
 
 def iter_glob(
     path: str | Path,
     _brackets_pattern: re.Pattern = re.compile(r"\{(.*?)\}"),
     _sub_bracket_sign: str = "{}",
     _split_sign: str = ",",
-):
-    bracket_occurences = [o.split(_split_sign) for o in _brackets_pattern.findall(path)]
-    clean_text = _brackets_pattern.sub(_sub_bracket_sign, path)
+) -> typing.Iterator[Path]:
+    bracket_occurences = [
+        o.split(_split_sign) for o in _brackets_pattern.findall(str(path))
+    ]
+    clean_text = _brackets_pattern.sub(_sub_bracket_sign, str(path))
     for fills in product(*bracket_occurences):
-        yield clean_text.format(*fills)
+        yield Path(clean_text.format(*fills))
 
 
 def test_iter_glob():
@@ -27,4 +31,4 @@ def test_iter_glob():
         "stats/**/*.json_2",
         "stats/**/*.json_4",
     ]
-    assert list(iter_glob(path)) == expected_outcome
+    assert list(map(str, iter_glob(path))) == expected_outcome
