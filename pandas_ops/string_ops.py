@@ -18,7 +18,7 @@ def iter_glob(
     ]
     clean_text = _brackets_pattern.sub(_sub_bracket_sign, str(path))
     for fills in product(*bracket_occurences):
-        yield Path(clean_text.format(*fills))
+        yield from Path().glob(clean_text.format(*fills))
 
 
 def test_iter_glob():
