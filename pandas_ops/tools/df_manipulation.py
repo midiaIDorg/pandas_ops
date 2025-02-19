@@ -2,7 +2,6 @@ import json
 import sys
 
 from pathlib import Path
-from pprint import pprint
 from warnings import warn
 
 import click
@@ -99,7 +98,7 @@ def run_general_sql(
     name_to_param = dict(param)
 
     if verbose:
-        pprint(name_to_param)
+        print(name_to_param)
 
     try:
         with open(config_path_or_sql_str, "rb") as f:
@@ -121,7 +120,7 @@ def run_general_sql(
 
     formatted_sql = sql.format(**name_to_param)
     if verbose:
-        pprint(formatted_sql)
+        print(formatted_sql)
 
     duckcon = duckdb.connect()
 
