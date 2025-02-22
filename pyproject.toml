@@ -24,7 +24,6 @@ dependencies = [
 ]
 
 [project.scripts]
-write_config = "pandas_ops.tools.write_config:main"
 apply_sql_with_duckdb = "pandas_ops.tools.apply_sql_with_duckdb:main"
 df_cat = "pandas_ops.tools.df_cat:main"
 df_equal = "pandas_ops.tools.df_equal:main"
