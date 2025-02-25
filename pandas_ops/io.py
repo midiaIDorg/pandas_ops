@@ -1,6 +1,7 @@
 import functools
 import inspect
 import warnings
+
 from functools import partial
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import mmapped_df
 import h5py
 import pandas as pd
 import pandas.errors
+
 from pyarrow import ArrowInvalid
 
 
@@ -48,6 +50,7 @@ __ext_to_reader = {
     ".hdf": hdf2df,
     ".parquet": add_kwargs(pd.read_parquet),
     ".startrek": mmapped_df.open_dataset,
+    ".cache": mmapped_df.open_dataset,
 }
 
 __ext_to_methodName = {
