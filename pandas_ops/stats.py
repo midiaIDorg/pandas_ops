@@ -2,6 +2,8 @@ import numba
 import numpy as np
 import numpy.typing as npt
 
+from collections import Counter
+
 
 @numba.njit
 def min_max(xx: npt.NDArray, *args):
@@ -35,6 +37,21 @@ def weighted_mean_and_var(
 
 
 @numba.njit(boundscheck=True)
+def count1D(
+    xx: npt.NDArray,
+) -> tuple[npt.NDArray, float | int, float | int]:
+    """
+    Do not try to optimize that by multithreading please without thinking of race conditions.
+    """
+    min_x, max_x = min_max(xx)
+    cnts = np.zeros(dtype=np.uint64, shape=max_x + 1)
+    for i in range(len(xx)):
+        cnts[xx[i]] += 1
+
+    return cnts, min_x, max_x
+
+
+@numba.njit(boundscheck=True)
 def count2D(
     xx: npt.NDArray,
     yy: npt.NDArray,
@@ -51,6 +68,11 @@ def count2D(
         cnts[xx[i], yy[i]] += 1
 
     return cnts, min_x, max_x, min_y, max_y
+
+
+def countND(*args: npt.NDArray):
+    """A function difficult to code in numba."""
+    return Counter(zip(*args))
 
 
 def quantiles(xx, bin_cnt=5):
