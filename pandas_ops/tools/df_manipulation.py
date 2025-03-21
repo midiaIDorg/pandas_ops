@@ -2,6 +2,7 @@ import json
 import sys
 
 from pathlib import Path
+from pprint import pprint
 from warnings import warn
 
 import click
@@ -54,16 +55,24 @@ def df_concat(output_path: Path, input_paths: list[Path]) -> None:
 @click.argument("source_path", type=Path)
 @click.argument("config_path_or_sql_str", type=str)
 @click.argument("target_path", type=Path)
-def apply_sql(source_path: Path, config_path_or_sql_str: str, target_path: Path):
+@click.option("--verbose", is_flag=True, help="Flush me with text.")
+def apply_sql(
+    source_path: Path,
+    config_path_or_sql_str: str,
+    target_path: Path,
+    verbose: bool = False,
+):
     with open(config_path_or_sql_str, "rb") as f:
         config: dict = tomllib.load(f)
 
     duckcon = duckdb.connect()
     if source_path.suffix == ".startrek":
         df = read_df(source_path)
-        source = Path("df")
+        source_path = "df"
 
     query = config["sql"].format(source=source_path, target=target_path)
+    if verbose:
+        pprint(query)
     duckcon.execute(query)
 
 
