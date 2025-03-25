@@ -1,15 +1,20 @@
 import pathlib
 import shutil
+
 from collections import defaultdict
 
 import click
-from mmapped_df import DatasetWriter, open_new_dataset_dct
+
+from mmapped_df import DatasetWriter
+from mmapped_df import open_new_dataset_dct
 from tqdm import tqdm
 
 import h5py
 import pandas as pd
+
 from opentimspy import OpenTIMS
-from pandas_ops.io import read_df, save_df
+from pandas_ops.io import read_df
+from pandas_ops.io import save_df
 from pandas_ops.parsers.misc import parse_key_equal_value
 
 
@@ -58,14 +63,13 @@ def hdf_to_startrek(
 # )
 # out_startrek = pathlib.Path("~/G8045.startrek")
 def tdf_to_startrek(in_tdf, out_startrek, progressbar: str = ""):
-    with OpenTIMS(in_tdf) as OT:
-        with DatasetWriter(out_startrek) as DW:
-            frames = OT
-            if progressbar:
-                frames = tqdm(OT, total=len(OT.frames["Id"]), desc=progressbar)
-            for frame in frames:
-                df = pd.DataFrame(frame, copy=False)
-                DW.append_df(df)
+    with OpenTIMS(in_tdf) as OT, DatasetWriter(out_startrek) as DW:
+        frames = OT
+        if progressbar:
+            frames = tqdm(OT, total=len(OT.frames["Id"]), desc=progressbar)
+        for frame in frames:
+            df = pd.DataFrame(frame, copy=False)
+            DW.append_df(df)
 
 
 def trivial_translator(
