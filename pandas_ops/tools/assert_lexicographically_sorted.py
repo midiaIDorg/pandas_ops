@@ -24,6 +24,6 @@ def assert_lexicographically_sorted(
 
     data = read_df(input_path, columns=columns)
     assert is_sorted_lexicographically(
-        strictly, *[data[col] for col in columns]
+        *[data[col] for col in columns], strictly=strictly
     ), f"`{input_path}` is not strictly lexicographically sorted by {columns}."
     print(f"`{input_path}` is strictly lexicographically sorted by {columns}.")

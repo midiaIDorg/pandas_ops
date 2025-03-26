@@ -3,11 +3,15 @@ TODO: start using Michal's midia_cpp::argsort for parallelized argsort (numpy su
 """
 
 import math
+
 from math import inf
 
 import numba
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
+
+from numba_progress import ProgressBar
 from pandas_ops.numba_ops import inputs_series_to_numpy
 
 
@@ -67,7 +71,8 @@ count_sorted = inputs_series_to_numpy(_count_sorted)
 
 @numba.njit(boundscheck=True)
 def _is_sorted_lexicographically(
-    strictly: bool = True,
+    strictly: bool,
+    progress_proxy: ProgressBar | None,
     *arrays: npt.NDArray,
 ) -> bool:
     """
@@ -84,6 +89,8 @@ def _is_sorted_lexicographically(
         assert arr.dtype == arrays[0].dtype
         assert len(arr) == len(arrays[0])
 
+    if progress_proxy is not None:
+        progress_proxy.update(1)
     if len(arr) == 1:
         return True
 
@@ -100,21 +107,47 @@ def _is_sorted_lexicographically(
             ):
                 return False
             prev[j] = arrays[j][i]
+        if progress_proxy is not None:
+            progress_proxy.update(1)
 
     return True
 
 
-is_sorted_lexicographically = inputs_series_to_numpy(_is_sorted_lexicographically)
+_is_sorted_lexicographically_pd_series_friendly = inputs_series_to_numpy(
+    _is_sorted_lexicographically
+)
+
+
+@inputs_series_to_numpy
+def is_sorted_lexicographically(
+    *arrays: npt.NDArray | pd.Series,
+    strictly: bool = False,
+    desc="Checking sortedness.",
+):
+    for arr in arrays:
+        assert len(arr) == len(arrays[0])
+    with ProgressBar(desc=desc, total=len(arrays[0])) as progress_proxy:
+        return _is_sorted_lexicographically_pd_series_friendly(
+            strictly, progress_proxy, *arrays
+        )
 
 
 def test_is_sorted_lexicograhically():
     assert not is_sorted_lexicographically(
-        True, np.array([10, 10, 20, 30]), np.array([11, 11, 1, 2])
+        np.array([10, 10, 20, 30]),
+        np.array([11, 11, 1, 2]),
+        strictly=True,
     )
     assert is_sorted_lexicographically(
-        True, np.array([10, 11, 20, 30]), np.array([11, 11, 1, 2])
+        np.array([10, 11, 20, 30]),
+        np.array([11, 11, 1, 2]),
+        strictly=True,
     )
-    assert not is_sorted_lexicographically(True, np.array([11, 1]), np.array([11, 20]))
+    assert not is_sorted_lexicographically(
+        np.array([11, 1]),
+        np.array([11, 20]),
+        strictly=True,
+    )
 
 
 @inputs_series_to_numpy
