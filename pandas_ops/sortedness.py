@@ -124,6 +124,15 @@ def is_sorted_lexicographically(
     strictly: bool = False,
     desc="Checking sortedness.",
 ):
+    """Check if arrays are sorted lexicograhically.
+
+    Arrays correspond to columns and we check if rows are sorted, first by first array, within same values groups by second, and so on.
+
+    Arguments:
+        *arrays (npt.NDArray|pd.Series): 1D arrays to check. Must be of the same shape.
+        strictly (bool): If False, checking if rows defined by column-arrays-entries are non-decreasing. If True, if they are strictly increasing.
+        desc (str): Message shown in progressbar.
+    """
     for arr in arrays:
         assert len(arr) == len(arrays[0])
     with ProgressBar(desc=desc, total=len(arrays[0])) as progress_proxy:
