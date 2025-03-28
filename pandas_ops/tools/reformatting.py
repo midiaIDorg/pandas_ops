@@ -10,7 +10,9 @@ from mmapped_df import open_new_dataset_dct
 from tqdm import tqdm
 
 import h5py
+import json
 import pandas as pd
+import toml
 
 from opentimspy import OpenTIMS
 from pandas_ops.io import read_df
@@ -105,3 +107,21 @@ def reformat_table(
     if force:
         shutil.rmtree(target, ignore_errors=True)
     _translators[(source.suffix, target.suffix)](source, target, **dict(kwarg))
+
+
+@click.command(context_settings={"show_default": True})
+@click.argument("source", type=pathlib.Path)
+@click.argument("target", type=pathlib.Path)
+def json2toml(source: pathlib.Path, target: pathlib.Path):
+    """Turn a json file to a toml file."""
+    with open(source, "r") as jsonfile, open(target, "w") as tomlfile:
+        toml.dump(json.load(jsonfile), tomlfile)
+
+
+@click.command(context_settings={"show_default": True})
+@click.argument("source", type=pathlib.Path)
+@click.argument("target", type=pathlib.Path)
+def toml2json(source: pathlib.Path, target: pathlib.Path):
+    """Turn a toml file to a json file."""
+    with open(source, "r") as tomlfile, open(target, "w") as jsonfile:
+        json.dump(toml.load(tomlfile), jsonfile, indent=4)
