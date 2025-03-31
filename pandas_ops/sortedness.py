@@ -219,3 +219,43 @@ def get_intersection_of_sorted_arrays(xx: npt.NDArray, yy: npt.NDArray) -> npt.N
             j += 1
             prev_y = y
     return np.array(res, dtype=xx.dtype)
+
+
+@numba.njit(boundscheck=True)
+def find_all_indices_that_break_lexicographic_sortedness(
+    strictly: bool,
+    *arrays: npt.NDArray,
+) -> bool:
+    """
+    Check if input arrays considered row-wise are lexicographically sorted.
+
+    E.g. arrays = (A, B) then A[i][0] > A[i-1][0] or A[i][0] == A[i-1][0] and B[i][0] > B[i-1][0] for strictly increasing or B[i][0] == B[i-1][0] if not.
+    Hence, A and B are consecutive dimensions to check.
+
+    Arguments:
+        strictly (bool): Should they be strictly increasing?
+        *arrays (npt.NDArray): Arrays of the same type and length.
+    """
+    for arr in arrays:
+        assert arr.dtype == arrays[0].dtype
+        assert len(arr) == len(arrays[0])
+
+    breakers = []
+    if len(arr) == 1:
+        return breakers
+
+    prev = np.empty(len(arrays), dtype=arr.dtype)
+    for j in range(len(arrays)):
+        prev[j] = arrays[j][0]
+
+    for i in range(1, len(arr)):
+        already_strictly_bigger = False
+        for j in range(len(arrays)):
+            already_strictly_bigger |= arrays[j][i] > prev[j]
+            if not already_strictly_bigger and (
+                arrays[j][i] < prev[j] or strictly and (j == len(arrays) - 1)
+            ):
+                breakers.append(i)
+            prev[j] = arrays[j][i]
+
+    return breakers

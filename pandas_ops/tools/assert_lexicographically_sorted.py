@@ -10,7 +10,9 @@ from pathlib import Path
 @click.argument("columns", nargs=-1)
 @click.option("--strictly", is_flag=True)
 def assert_lexicographically_sorted(
-    input_path: Path, columns, strictly: bool = False
+    input_path: Path,
+    columns: list[str],
+    strictly: bool = False,
 ) -> None:
     """Check a table is lexicographically sorted w.r.t. the provided columns.\n
 
