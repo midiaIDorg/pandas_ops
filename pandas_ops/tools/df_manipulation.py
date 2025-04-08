@@ -27,7 +27,10 @@ input_paths = (
 @click.command(context_settings={"show_default": True})
 @click.argument("output_path", type=Path, nargs=1)
 @click.argument("input_paths", type=Path, nargs=-1)
-def df_concat(output_path: Path, input_paths: list[Path]) -> None:
+def df_concat(
+    output_path: Path,
+    input_paths: list[Path],
+) -> None:
     """
     Concatenate tables.
 

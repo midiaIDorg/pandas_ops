@@ -40,6 +40,8 @@ run_general_sql = "pandas_ops.tools.df_manipulation:run_general_sql"
 assert_lexicographically_sorted= "pandas_ops.tools.assert_lexicographically_sorted:assert_lexicographically_sorted"
 toml2json = "pandas_ops.tools.reformatting:toml2json"
 json2toml = "pandas_ops.tools.reformatting:json2toml"
+jsons2df = "pandas_ops.tools.jsons2df:main"
+
 
 [project.urls]
 homepage="https://github.com/midiaIDorg/pandas_ops.git"
