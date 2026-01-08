@@ -50,6 +50,7 @@ __ext_to_reader = {
     ".hdf": hdf2df,
     ".parquet": add_kwargs(pd.read_parquet),
     ".startrek": mmappet.open_dataset,
+    ".mmappet": mmappet.open_dataset,
     ".cache": mmappet.open_dataset,
 }
 
