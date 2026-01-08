@@ -22,6 +22,7 @@ dependencies = [
     "pytest",
     "h5py",
     "toml",
+    "pyarrow",
 ]
 
 [project.scripts]

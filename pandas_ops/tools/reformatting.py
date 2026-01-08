@@ -5,8 +5,8 @@ from collections import defaultdict
 
 import click
 
-from mmapped_df import DatasetWriter
-from mmapped_df import open_new_dataset_dct
+from mmappet import DatasetWriter
+from mmappet import open_new_dataset_dct
 from tqdm import tqdm
 
 import h5py

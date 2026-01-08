@@ -5,7 +5,7 @@ import warnings
 from functools import partial
 from pathlib import Path
 
-import mmapped_df
+import mmappet
 
 import h5py
 import pandas as pd
@@ -49,8 +49,8 @@ __ext_to_reader = {
     ".pandas_hdf": add_kwargs(pd.read_hdf),
     ".hdf": hdf2df,
     ".parquet": add_kwargs(pd.read_parquet),
-    ".startrek": mmapped_df.open_dataset,
-    ".cache": mmapped_df.open_dataset,
+    ".startrek": mmappet.open_dataset,
+    ".cache": mmappet.open_dataset,
 }
 
 __ext_to_methodName = {
@@ -115,7 +115,7 @@ def save_df(
         case ".pandas_hdf":
             dataframe.to_hdf(file_path, key=key, *args, **kwargs)
         case ".startrek":
-            with mmapped_df.DatasetWriter(path=file_path, **kwargs) as data_writer:
+            with mmappet.DatasetWriter(path=file_path, **kwargs) as data_writer:
                 data_writer.append_df(dataframe)
         case other:  # this might obviously not work
             writer = getattr(dataframe, __ext_to_methodName[file_extension])
@@ -137,7 +137,7 @@ def save_df2(
     file_extension = get_extension(file_path)
     match file_extension:
         case ".startrek":
-            with mmapped_df.DatasetWriter(path=file_path, **kwargs) as data_writer:
+            with mmappet.DatasetWriter(path=file_path, **kwargs) as data_writer:
                 data_writer.append_df(dataframe)
         case other:
             writer_name = f"to_{file_extension[1:]}"
