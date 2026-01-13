@@ -13,9 +13,9 @@ authors=[
 ]
 dependencies = [
     "click",
-    "numpy",
     "numba",
     "numba_progress",
+    "numpy",
     "pandas",
     "tqdm",
     "duckdb",
