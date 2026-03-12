@@ -259,3 +259,24 @@ def find_all_indices_that_break_lexicographic_sortedness(
             prev[j] = arrays[j][i]
 
     return breakers
+
+
+def df_is_lexsorted(df):
+    cols = df.columns
+    values = df[cols].to_numpy()
+
+    for i in range(1, len(values)):
+        if tuple(values[i - 1]) > tuple(values[i]):
+            return False
+    return True
+
+
+def df_is_lex_increasing(df):
+    rows = df.itertuples(index=False, name=None)
+
+    prev = next(rows, None)
+    for curr in rows:
+        if not (prev < curr):  # strict comparison
+            return False
+        prev = curr
+    return True

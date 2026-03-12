@@ -42,6 +42,7 @@ assert_lexicographically_sorted= "pandas_ops.tools.assert_lexicographically_sort
 toml2json = "pandas_ops.tools.reformatting:toml2json"
 json2toml = "pandas_ops.tools.reformatting:json2toml"
 jsons2df = "pandas_ops.tools.jsons2df:main"
+sqlite_peek = "pandas_ops.tools.sqlite_peek:main"
 
 
 [project.urls]
