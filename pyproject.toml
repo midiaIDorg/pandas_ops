@@ -29,7 +29,6 @@ dependencies = [
 apply_sql_with_duckdb = "pandas_ops.tools.apply_sql_with_duckdb:main"
 df_cat = "pandas_ops.tools.df_cat:main"
 df_equal = "pandas_ops.tools.df_equal:main"
-df_head = "pandas_ops.tools.df_head:main"
 df_histogram = "pandas_ops.tools.df_histogram:main"
 df_len = "pandas_ops.tools.df_len:main"
 df_parsingstack = "pandas_ops.tools.df_parsingstack:main"
